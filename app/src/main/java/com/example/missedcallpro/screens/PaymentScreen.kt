@@ -1,6 +1,7 @@
 package com.example.missedcallpro.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -15,65 +16,66 @@ fun PaymentScreen(
     onSelectPlan: (PlanTier) -> Unit
 ) {
     ScreenScaffold(title = "Upgrade", onBack = onBack) { padding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .padding(padding)
-                .padding(16.dp)
-                .fillMaxSize()
+                .fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("Choose a plan", style = MaterialTheme.typography.headlineSmall)
-            Spacer(Modifier.height(8.dp))
-            Text("Limits are per month. Templates editable on paid plans.")
-            Spacer(Modifier.height(16.dp))
+            item {
+                Text("Choose a plan", style = MaterialTheme.typography.headlineSmall)
+                Spacer(Modifier.height(8.dp))
+                Text("Limits are per month. Templates editable on paid plans.")
+                Spacer(Modifier.height(16.dp))
+            }
+            item {
+                PlanCard(
+                    title = "Free",
+                    price = "$0",
+                    sms = 15,
+                    email = 15,
+                    editable = false,
+                    selected = currentPlan == PlanTier.FREE,
+                    onClick = { onSelectPlan(PlanTier.FREE) }
+                )
+            }
 
-            PlanCard(
-                title = "Free",
-                price = "$0",
-                sms = 15,
-                email = 15,
-                editable = false,
-                selected = currentPlan == PlanTier.FREE,
-                onClick = { onSelectPlan(PlanTier.FREE) }
-            )
+            item {
+                PlanCard(
+                    title = "Starter",
+                    price = "$5 / month",
+                    sms = 100,
+                    email = 100,
+                    editable = true,
+                    selected = currentPlan == PlanTier.STARTER,
+                    onClick = { onSelectPlan(PlanTier.STARTER) }
+                )
+            }
 
-            Spacer(Modifier.height(12.dp))
-            PlanCard(
-                title = "Starter",
-                price = "$5 / month",
-                sms = 100,
-                email = 100,
-                editable = true,
-                selected = currentPlan == PlanTier.STARTER,
-                onClick = { onSelectPlan(PlanTier.STARTER) }
-            )
+            item {
+                PlanCard(
+                    title = "Pro",
+                    price = "$15 / month",
+                    sms = 300,
+                    email = 300,
+                    editable = true,
+                    selected = currentPlan == PlanTier.PRO,
+                    onClick = { onSelectPlan(PlanTier.PRO) }
+                )
+            }
 
-            Spacer(Modifier.height(12.dp))
-            PlanCard(
-                title = "Pro",
-                price = "$15 / month",
-                sms = 300,
-                email = 300,
-                editable = true,
-                selected = currentPlan == PlanTier.PRO,
-                onClick = { onSelectPlan(PlanTier.PRO) }
-            )
-
-            Spacer(Modifier.height(12.dp))
-            PlanCard(
-                title = "Pro+",
-                price = "$49 / month",
-                sms = 1000,
-                email = 1000,
-                editable = true,
-                selected = currentPlan == PlanTier.PRO_PLUS,
-                onClick = { onSelectPlan(PlanTier.PRO_PLUS) }
-            )
-
-            Spacer(Modifier.height(18.dp))
-            Text(
-                "Demo note: plan selection is local-only. Next step: Google Play Billing subscription.",
-                style = MaterialTheme.typography.bodySmall
-            )
+            item {
+                PlanCard(
+                    title = "Pro+",
+                    price = "$49 / month",
+                    sms = 1000,
+                    email = 1000,
+                    editable = true,
+                    selected = currentPlan == PlanTier.PRO_PLUS,
+                    onClick = { onSelectPlan(PlanTier.PRO_PLUS) }
+                )
+            }
         }
     }
 }
