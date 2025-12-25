@@ -33,7 +33,7 @@ class GoogleAuthClient(
             val googleIdOption = GetGoogleIdOption.Builder()
                 .setServerClientId(context.getString(R.string.default_web_client_id))
                 .setFilterByAuthorizedAccounts(false)
-                .setAutoSelectEnabled(false)
+                .setAutoSelectEnabled(true)
                 .build()
 
             val request = GetCredentialRequest.Builder()
@@ -68,7 +68,7 @@ class GoogleAuthClient(
         return null
     }
 
-    private suspend fun signOutUser() {
+    suspend fun signOutUser() {
         // 1. Firebase Sign Out (Synchronous)
         auth.signOut()
 

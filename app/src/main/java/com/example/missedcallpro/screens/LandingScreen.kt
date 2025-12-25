@@ -71,7 +71,8 @@ fun LandingScreen(
 
                     scope.launch {
                         val user = authRepo.signInWithGoogle()
-                        Log.i("loggeduser",user.toString())
+                        Log.d("logged user",user.toString())
+
                         loading = false
 
                         if (user != null) {

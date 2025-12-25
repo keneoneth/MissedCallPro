@@ -3,12 +3,16 @@ package com.example.missedcallpro.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.missedcallpro.auth.GoogleAuthClient
 import com.example.missedcallpro.data.AppState
 import com.example.missedcallpro.data.PlanTier
 import com.example.missedcallpro.ui.QuotaRow
 import com.example.missedcallpro.ui.ScreenScaffold
+import kotlinx.coroutines.launch
 
 @Composable
 fun PlanQuotaScreen(
@@ -20,11 +24,23 @@ fun PlanQuotaScreen(
     onSignOut: () -> Unit
 ) {
     val plan = state.plan
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val authRepo = GoogleAuthClient(context)
 
     ScreenScaffold(
         title = "Plan & Quotas",
         actions = {
-            TextButton(onClick = onSignOut) { Text("Sign out") }
+            TextButton(onClick = {
+
+                scope.launch {
+                    authRepo.signOutUser()
+                    onSignOut()
+                }
+
+            }) {
+                Text("Sign out")
+            }
         }
     ) { padding ->
         Column(

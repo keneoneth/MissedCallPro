@@ -86,7 +86,6 @@ fun AppNavGraph(
 
 /** Keep actions separate so screens stay dumb/simple */
 private object LandingActions {
-    suspend fun doSignIn(store: AppStateStore) = store.signIn()
     @OptIn(DelicateCoroutinesApi::class)
     fun signIn(nav: NavHostController, store: AppStateStore) {
         kotlinx.coroutines.GlobalScope.launch {
