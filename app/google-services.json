@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "364608561220",
+    "project_id": "missed-call-pro",
+    "storage_bucket": "missed-call-pro.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:364608561220:android:83597ae40ab447c6f21c11",
+        "android_client_info": {
+          "package_name": "com.example.missedcallpro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "364608561220-qqno3d76u98aebb2nooiosvlhpnbeb21.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.missedcallpro",
+            "certificate_hash": "daa489621f3dc5846110b8209d8f09697f65e612"
+          }
+        },
+        {
+          "client_id": "364608561220-tlbf2h7njfp6aa5devpuo326463jsvlr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvzspDKy1uHXJVSsoySBYbK5U9Z8jB9wY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "364608561220-tlbf2h7njfp6aa5devpuo326463jsvlr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

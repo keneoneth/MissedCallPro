@@ -1,38 +1,94 @@
 package com.example.missedcallpro.screens
 
+import android.app.Activity
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.missedcallpro.auth.GoogleAuthClient
 import com.example.missedcallpro.ui.ScreenScaffold
+import kotlinx.coroutines.launch
 
 @Composable
 fun LandingScreen(
     onGoogleLogin: () -> Unit
 ) {
-    ScreenScaffold(title = "MissedCallPro") { padding ->
+
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    // Use the AuthRepository (the class we created in the previous step)
+    val authRepo = GoogleAuthClient(context)
+
+    var err by remember { mutableStateOf<String?>(null) }
+    var loading by remember { mutableStateOf(false) }
+
+    ScreenScaffold(title = "") { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(24.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Center
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Follow up on missed calls fast.", style = MaterialTheme.typography.headlineSmall)
-            Spacer(Modifier.height(12.dp))
-            Text("Login to manage your plan, quotas, and templates.")
-            Spacer(Modifier.height(24.dp))
 
-            Button(onClick = onGoogleLogin, modifier = Modifier.fillMaxWidth()) {
-                Text("Login with Google")
+            // App name — bold & centered
+            Text(
+                text = "MissedCallPro",
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            Text(
+                text = "Follow up on missed calls automatically",
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Spacer(Modifier.height(32.dp))
+
+            if (loading) {
+                CircularProgressIndicator()
+            } else {
+                Button(onClick = {
+                    loading = true
+                    err = null
+
+                    scope.launch {
+                        val user = authRepo.signInWithGoogle()
+                        Log.i("loggeduser",user.toString())
+                        loading = false
+
+                        if (user != null) {
+                            onGoogleLogin()
+                        } else {
+                            err = "Login failed or was cancelled"
+                        }
+                    }
+                }) {
+                    Text("Login with Google")
+                }
             }
 
-            Spacer(Modifier.height(12.dp))
-            Text(
-                "Note: Google login is stubbed for now. Next step is wiring real Google Sign-In.",
-                style = MaterialTheme.typography.bodySmall
-            )
+            err?.let {
+                Text(text = it, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
+            }
+
         }
     }
 }

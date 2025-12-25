@@ -11,6 +11,7 @@ import com.example.missedcallpro.screens.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun AppNavGraph(
     nav: NavHostController,
@@ -33,7 +34,6 @@ fun AppNavGraph(
         composable(Routes.LANDING) {
             LandingScreen(
                 onGoogleLogin = {
-                    // Stub: mark signed-in then go to plan screen
                     LandingActions.signIn(nav, store)
                 }
             )

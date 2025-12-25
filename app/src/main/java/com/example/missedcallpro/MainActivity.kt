@@ -9,10 +9,12 @@ import androidx.compose.runtime.remember
 import androidx.navigation.compose.rememberNavController
 import com.example.missedcallpro.data.AppStateStore
 import com.example.missedcallpro.ui.AppNavGraph
+import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
 
         setContent {
             val nav = rememberNavController()

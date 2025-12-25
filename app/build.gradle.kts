@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -62,4 +63,19 @@ dependencies {
     implementation("androidx.compose.material3:material3")
 
     implementation("androidx.navigation:navigation-compose:2.8.4")
+
+    // Import the BoM first
+    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
+
+    // Firebase Auth (version is managed by BoM)
+    implementation("com.google.firebase:firebase-auth")
+
+    // Google Sign-In
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
+    // This library specifically provides the .await() function for Tasks
+    implementation(libs.kotlinx.coroutines.play.services)
+
 }
