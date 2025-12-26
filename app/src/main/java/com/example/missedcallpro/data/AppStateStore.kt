@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.map
 private val Context.dataStore by preferencesDataStore(name = "missedcallpro_prefs")
 
 data class AppState(
+    val username: String,
     val signedIn: Boolean,
     val plan: PlanTier,
     val quotas: Quotas,
@@ -19,6 +20,7 @@ data class AppState(
 class AppStateStore(private val context: Context) {
 
     private object Keys {
+        val USERNAME = stringPreferencesKey("username")
         val SIGNED_IN = booleanPreferencesKey("signed_in")
         val PLAN = stringPreferencesKey("plan")
         val SMS_USED = intPreferencesKey("sms_used")
@@ -29,6 +31,7 @@ class AppStateStore(private val context: Context) {
 
     val state: Flow<AppState> = context.dataStore.data.map { prefs ->
         val plan = PlanTier.valueOf(prefs[Keys.PLAN] ?: PlanTier.FREE.name)
+        val username = prefs[Keys.USERNAME] ?: ""
         val signedIn = prefs[Keys.SIGNED_IN] ?: false
         val smsUsed = prefs[Keys.SMS_USED] ?: 0
         val emailUsed = prefs[Keys.EMAIL_USED] ?: 0
@@ -37,12 +40,19 @@ class AppStateStore(private val context: Context) {
         val defaultEmail = if (plan.isPaid) Defaults.PAID_EMAIL_TEMPLATE else Defaults.FREE_EMAIL_TEMPLATE
 
         AppState(
+            username = username,
             signedIn = signedIn,
             plan = plan,
             quotas = Quotas(smsUsed = smsUsed, emailUsed = emailUsed),
             smsTemplate = prefs[Keys.SMS_TEMPLATE] ?: defaultSms,
             emailTemplate = prefs[Keys.EMAIL_TEMPLATE] ?: defaultEmail
         )
+    }
+
+    suspend fun setUsername(value: String) {
+        context.dataStore.edit {
+            it[Keys.USERNAME] = value;
+        }
     }
 
     suspend fun signIn() {

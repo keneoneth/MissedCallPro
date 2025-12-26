@@ -19,6 +19,7 @@ fun AppNavGraph(
 ) {
     val state by store.state.collectAsState(
         initial = com.example.missedcallpro.data.AppState(
+            username = "",
             signedIn = false,
             plan = com.example.missedcallpro.data.PlanTier.FREE,
             quotas = com.example.missedcallpro.data.Quotas(0, 0),
@@ -33,8 +34,8 @@ fun AppNavGraph(
 
         composable(Routes.LANDING) {
             LandingScreen(
-                onGoogleLogin = {
-                    LandingActions.signIn(nav, store)
+                onGoogleLogin =  {
+                    username -> LandingActions.signIn(username, nav, store)
                 }
             )
         }
@@ -87,8 +88,10 @@ fun AppNavGraph(
 /** Keep actions separate so screens stay dumb/simple */
 private object LandingActions {
     @OptIn(DelicateCoroutinesApi::class)
-    fun signIn(nav: NavHostController, store: AppStateStore) {
+    fun signIn(username: String, nav: NavHostController, store: AppStateStore) {
+
         kotlinx.coroutines.GlobalScope.launch {
+            store.setUsername(username)
             store.signIn()
         }
         nav.navigate(Routes.PLAN) { popUpTo(Routes.LANDING) { inclusive = true } }
