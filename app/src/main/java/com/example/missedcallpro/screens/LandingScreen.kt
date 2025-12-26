@@ -1,9 +1,9 @@
 package com.example.missedcallpro.screens
 
-import android.app.Activity
+import retrofit2.HttpException
+import android.os.Build
 import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -18,9 +18,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.missedcallpro.App
 import com.example.missedcallpro.auth.GoogleAuthClient
 import com.example.missedcallpro.ui.ScreenScaffold
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 @Composable
 fun LandingScreen(
@@ -35,6 +37,9 @@ fun LandingScreen(
 
     var err by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
+
+    val app = LocalContext.current.applicationContext as App
+    val api = app.container.api
 
     ScreenScaffold(title = "") { padding ->
         Column(
@@ -73,10 +78,21 @@ fun LandingScreen(
                         val user = authRepo.signInWithGoogle()
                         Log.d("logged user",user.toString())
 
-                        loading = false
 
                         if (user != null) {
-                            onGoogleLogin()
+                            try {
+                                val resp = api.bootstrap()
+                                Log.d("logged resp",resp.toString())
+                                onGoogleLogin()
+                            } catch (e: HttpException) {
+                                err = when (e.code()) {
+                                    else -> "Server error (${e.code()})."
+                                }
+                            } catch (e: Exception) {
+                                err = e.message ?: "Unknown error"
+                            } finally {
+                                loading = false
+                            }
                         } else {
                             err = "Login failed or was cancelled"
                         }
