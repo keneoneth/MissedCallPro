@@ -1,7 +1,9 @@
 package com.example.missedcallpro.data.remote
 
+import com.example.missedcallpro.data.PlanDto
 import com.squareup.moshi.JsonClass
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 @JsonClass(generateAdapter = true)
 data class BootstrapResponse(
@@ -26,4 +28,7 @@ interface BackendApi {
 
     @POST("auth/deleteAccount")
     suspend fun deleteAccount(): DeleteAccountResponse
+
+    @GET("/plans")
+    suspend fun getPlans(): List<PlanDto>
 }

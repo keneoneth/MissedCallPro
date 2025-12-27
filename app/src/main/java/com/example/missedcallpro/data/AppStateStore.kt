@@ -1,6 +1,7 @@
 package com.example.missedcallpro.data
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -32,7 +33,7 @@ class AppStateStore(private val context: Context) {
     }
 
     val state: Flow<AppState> = context.dataStore.data.map { prefs ->
-        val plan = PlanTier.valueOf(prefs[Keys.PLAN] ?: PlanTier.FREE.name)
+        val plan = PlanTier(prefs[Keys.PLAN] ?: "",0,0, false)
         val username = prefs[Keys.USERNAME] ?: ""
         val email = prefs[Keys.EMAIL] ?: ""
 
@@ -40,8 +41,8 @@ class AppStateStore(private val context: Context) {
         val smsUsed = prefs[Keys.SMS_USED] ?: 0
         val emailUsed = prefs[Keys.EMAIL_USED] ?: 0
 
-        val defaultSms = if (plan.isPaid) Defaults.PAID_SMS_TEMPLATE else Defaults.FREE_SMS_TEMPLATE
-        val defaultEmail = if (plan.isPaid) Defaults.PAID_EMAIL_TEMPLATE else Defaults.FREE_EMAIL_TEMPLATE
+        val defaultSms = Defaults.SMS_TEMPLATE
+        val defaultEmail = Defaults.EMAIL_TEMPLATE
 
         AppState(
             username = username,
@@ -72,7 +73,7 @@ class AppStateStore(private val context: Context) {
     suspend fun signOut() {
         context.dataStore.edit {
             it[Keys.SIGNED_IN] = false
-            it[Keys.PLAN] = PlanTier.FREE.name
+            it[Keys.PLAN] = ""
             it[Keys.SMS_USED] = 0
             it[Keys.EMAIL_USED] = 0
             it.remove(Keys.SMS_TEMPLATE)
@@ -82,10 +83,8 @@ class AppStateStore(private val context: Context) {
 
     suspend fun setPlan(plan: PlanTier) {
         context.dataStore.edit {
+            Log.d("Update plan name", plan.name)
             it[Keys.PLAN] = plan.name
-            // Reset templates to defaults whenever plan changes (simple + predictable)
-            it.remove(Keys.SMS_TEMPLATE)
-            it.remove(Keys.EMAIL_TEMPLATE)
         }
     }
 

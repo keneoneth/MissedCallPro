@@ -1,9 +1,7 @@
 package com.example.missedcallpro.screens
 
 import retrofit2.HttpException
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -22,7 +20,6 @@ import com.example.missedcallpro.App
 import com.example.missedcallpro.auth.GoogleAuthClient
 import com.example.missedcallpro.ui.ScreenScaffold
 import kotlinx.coroutines.launch
-import java.io.IOException
 
 @Composable
 fun LandingScreen(

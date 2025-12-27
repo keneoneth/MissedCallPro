@@ -18,7 +18,7 @@ fun TemplateScreen(
     onEditBlocked: () -> Unit,
     onSave: (String) -> Unit
 ) {
-    val isPaid = state.plan.isPaid
+    val isPaid = state.plan.can_edit_templates
     val templateText = when (type) {
         TemplateType.SMS -> state.smsTemplate
         TemplateType.EMAIL -> state.emailTemplate

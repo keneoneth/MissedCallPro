@@ -23,10 +23,10 @@ fun AppNavGraph(
             username = "",
             email = "",
             signedIn = false,
-            plan = com.example.missedcallpro.data.PlanTier.FREE,
+            plan = com.example.missedcallpro.data.PlanTier("",0,0,false),
             quotas = com.example.missedcallpro.data.Quotas(0, 0),
-            smsTemplate = com.example.missedcallpro.data.Defaults.FREE_SMS_TEMPLATE,
-            emailTemplate = com.example.missedcallpro.data.Defaults.FREE_EMAIL_TEMPLATE
+            smsTemplate = com.example.missedcallpro.data.Defaults.SMS_TEMPLATE,
+            emailTemplate = com.example.missedcallpro.data.Defaults.EMAIL_TEMPLATE
         )
     )
 
@@ -77,6 +77,7 @@ fun AppNavGraph(
 
         composable(Routes.PAYMENT) {
             PaymentScreen(
+                state=state,
                 currentPlan = state.plan,
                 onBack = { nav.popBackStack() },
                 onSelectPlan = { selected ->

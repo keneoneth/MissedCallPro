@@ -64,9 +64,9 @@ fun PlanQuotaScreen(
                 Column(Modifier.padding(16.dp)) {
                     Text("Current Plan", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(6.dp))
-                    Text(plan.display, style = MaterialTheme.typography.headlineSmall)
+                    Text(plan.name, style = MaterialTheme.typography.headlineSmall)
 
-                    if (plan == PlanTier.FREE) {
+                    if (!plan.can_edit_templates) {
                         Spacer(Modifier.height(10.dp))
                         Button(onClick = onUpgrade, modifier = Modifier.fillMaxWidth()) {
                             Text("Upgrade →")
