@@ -6,8 +6,7 @@ import retrofit2.http.POST
 @JsonClass(generateAdapter = true)
 data class BootstrapResponse(
     val username: String,
-    val access_token: String,
-    val refresh_token: String
+    val email: String,
 )
 
 @JsonClass(generateAdapter = true)
@@ -15,12 +14,16 @@ data class LogoutResponse(
     val ok: Boolean,
 )
 @JsonClass(generateAdapter = true)
-data class LogoutRequest(val refresh_token: String)
+data class DeleteAccountResponse(
+    val ok: Boolean,
+)
 interface BackendApi {
     @POST("auth/bootstrap")
     suspend fun bootstrap(): BootstrapResponse
 
     @POST("auth/logout")
-    suspend fun logout(@Body req: LogoutRequest): LogoutResponse
+    suspend fun logout(): LogoutResponse
 
+    @POST("auth/deleteAccount")
+    suspend fun deleteAccount(): DeleteAccountResponse
 }

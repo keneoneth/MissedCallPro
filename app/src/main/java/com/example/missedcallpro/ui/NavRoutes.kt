@@ -6,4 +6,5 @@ object Routes {
     const val TEMPLATE_SMS = "template_sms"
     const val TEMPLATE_EMAIL = "template_email"
     const val PAYMENT = "payment"
+    const val MY_ACCOUNT = "my_account"
 }

@@ -1,5 +1,6 @@
 package com.example.missedcallpro.ui
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,8 +21,7 @@ fun AppNavGraph(
     val state by store.state.collectAsState(
         initial = com.example.missedcallpro.data.AppState(
             username = "",
-            access_token = "",
-            refresh_token = "",
+            email = "",
             signedIn = false,
             plan = com.example.missedcallpro.data.PlanTier.FREE,
             quotas = com.example.missedcallpro.data.Quotas(0, 0),
@@ -37,7 +37,7 @@ fun AppNavGraph(
         composable(Routes.LANDING) {
             LandingScreen(
                 onGoogleLogin =  {
-                    username, access_token, refresh_token -> LandingActions.signIn(username, access_token, refresh_token, nav, store)
+                    username, email-> LandingActions.signIn(username, email, nav, store)
                 }
             )
         }
@@ -48,7 +48,7 @@ fun AppNavGraph(
                 onOpenSmsTemplate = { nav.navigate(Routes.TEMPLATE_SMS) },
                 onOpenEmailTemplate = { nav.navigate(Routes.TEMPLATE_EMAIL) },
                 onUpgrade = { nav.navigate(Routes.PAYMENT) },
-                onResetMonth = { PlanActions.resetMonth(store) },
+                onViewMyAccount = { nav.navigate(Routes.MY_ACCOUNT) },
                 onSignOut = { PlanActions.signOut(nav, store) }
             )
         }
@@ -84,18 +84,27 @@ fun AppNavGraph(
                 }
             )
         }
+
+        composable(Routes.MY_ACCOUNT) {
+            AccountScreen(
+                state = state,
+                username = state.username,
+                email = state.email,
+                onBack = { nav.popBackStack() },
+                onConfirmDelete = {AccountActions.deleteAccount(nav)}
+            )
+        }
     }
 }
 
 /** Keep actions separate so screens stay dumb/simple */
 private object LandingActions {
     @OptIn(DelicateCoroutinesApi::class)
-    fun signIn(username: String, access_token: String, refresh_token: String, nav: NavHostController, store: AppStateStore) {
+    fun signIn(username: String, email: String, nav: NavHostController, store: AppStateStore) {
 
         kotlinx.coroutines.GlobalScope.launch {
             store.setUsername(username)
-            store.setAccessToken(access_token)
-            store.setRefreshToken(refresh_token)
+            store.setEmail(email)
             store.signIn()
         }
         nav.navigate(Routes.PLAN) { popUpTo(Routes.LANDING) { inclusive = true } }
@@ -103,10 +112,6 @@ private object LandingActions {
 }
 
 private object PlanActions {
-    @OptIn(DelicateCoroutinesApi::class)
-    fun resetMonth(store: AppStateStore) {
-        kotlinx.coroutines.GlobalScope.launch { store.resetMonth() }
-    }
     @OptIn(DelicateCoroutinesApi::class)
     fun signOut(nav: NavHostController, store: AppStateStore) {
         kotlinx.coroutines.GlobalScope.launch { store.signOut() }
@@ -126,5 +131,12 @@ private object PaymentActions {
     fun setPlanThenBack(nav: NavHostController, store: AppStateStore, plan: com.example.missedcallpro.data.PlanTier) {
         kotlinx.coroutines.GlobalScope.launch { store.setPlan(plan) }
         nav.popBackStack()
+    }
+}
+
+private object AccountActions{
+    @OptIn(DelicateCoroutinesApi::class)
+    fun deleteAccount(nav: NavHostController) {
+        nav.navigate(Routes.LANDING) { popUpTo(Routes.PLAN) { inclusive = true } }
     }
 }

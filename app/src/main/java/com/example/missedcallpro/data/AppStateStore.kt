@@ -10,8 +10,7 @@ private val Context.dataStore by preferencesDataStore(name = "missedcallpro_pref
 
 data class AppState(
     val username: String,
-    val access_token: String,
-    val refresh_token: String,
+    val email: String,
     val signedIn: Boolean,
     val plan: PlanTier,
     val quotas: Quotas,
@@ -23,8 +22,7 @@ class AppStateStore(private val context: Context) {
 
     private object Keys {
         val USERNAME = stringPreferencesKey("username")
-        val ACCESS_TOKEN = stringPreferencesKey("access_token")
-        val REFRESH_TOKEN = stringPreferencesKey("refresh_token")
+        val EMAIL = stringPreferencesKey("email")
         val SIGNED_IN = booleanPreferencesKey("signed_in")
         val PLAN = stringPreferencesKey("plan")
         val SMS_USED = intPreferencesKey("sms_used")
@@ -36,8 +34,7 @@ class AppStateStore(private val context: Context) {
     val state: Flow<AppState> = context.dataStore.data.map { prefs ->
         val plan = PlanTier.valueOf(prefs[Keys.PLAN] ?: PlanTier.FREE.name)
         val username = prefs[Keys.USERNAME] ?: ""
-        val access_token = prefs[Keys.ACCESS_TOKEN] ?: ""
-        val refresh_token = prefs[Keys.REFRESH_TOKEN] ?: ""
+        val email = prefs[Keys.EMAIL] ?: ""
 
         val signedIn = prefs[Keys.SIGNED_IN] ?: false
         val smsUsed = prefs[Keys.SMS_USED] ?: 0
@@ -48,8 +45,7 @@ class AppStateStore(private val context: Context) {
 
         AppState(
             username = username,
-            access_token = access_token,
-            refresh_token = refresh_token,
+            email = email,
             signedIn = signedIn,
             plan = plan,
             quotas = Quotas(smsUsed = smsUsed, emailUsed = emailUsed),
@@ -63,16 +59,9 @@ class AppStateStore(private val context: Context) {
             it[Keys.USERNAME] = value;
         }
     }
-
-    suspend fun setAccessToken(value: String) {
+    suspend fun setEmail(value: String) {
         context.dataStore.edit {
-            it[Keys.ACCESS_TOKEN] = value;
-        }
-    }
-
-    suspend fun setRefreshToken(value: String) {
-        context.dataStore.edit {
-            it[Keys.REFRESH_TOKEN] = value;
+            it[Keys.EMAIL] = value;
         }
     }
 
@@ -123,10 +112,4 @@ class AppStateStore(private val context: Context) {
         }
     }
 
-    suspend fun resetMonth() {
-        context.dataStore.edit {
-            it[Keys.SMS_USED] = 0
-            it[Keys.EMAIL_USED] = 0
-        }
-    }
 }

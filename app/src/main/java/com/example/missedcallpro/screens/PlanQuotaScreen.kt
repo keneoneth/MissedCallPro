@@ -12,7 +12,6 @@ import com.example.missedcallpro.App
 import com.example.missedcallpro.auth.GoogleAuthClient
 import com.example.missedcallpro.data.AppState
 import com.example.missedcallpro.data.PlanTier
-import com.example.missedcallpro.data.remote.LogoutRequest
 import com.example.missedcallpro.ui.QuotaRow
 import com.example.missedcallpro.ui.ScreenScaffold
 import kotlinx.coroutines.launch
@@ -24,7 +23,7 @@ fun PlanQuotaScreen(
     onOpenSmsTemplate: () -> Unit,
     onOpenEmailTemplate: () -> Unit,
     onUpgrade: () -> Unit,
-    onResetMonth: () -> Unit,
+    onViewMyAccount: () -> Unit,
     onSignOut: () -> Unit
 ) {
     val plan = state.plan
@@ -41,9 +40,8 @@ fun PlanQuotaScreen(
 
                 scope.launch {
                     try {
-                        // 1. Tell the server first while we still have the token
-                        val resp = api.logout(LogoutRequest(state.refresh_token))
-                        Log.d("logged out resp", resp.toString())
+                        val resp = api.logout()
+                        assert(resp.ok)
                         authRepo.signOutUser()
                         onSignOut()
                     } catch (e: Exception) {
@@ -81,7 +79,10 @@ fun PlanQuotaScreen(
                     }
                 }
             }
-
+            Spacer(Modifier.height(16.dp))
+            OutlinedButton(onClick = onViewMyAccount, modifier = Modifier.fillMaxWidth()) {
+                Text("My Account")
+            }
             Spacer(Modifier.height(16.dp))
             Text("Quotas", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(8.dp))
@@ -99,16 +100,6 @@ fun PlanQuotaScreen(
                 onClick = onOpenEmailTemplate
             )
 
-            Spacer(Modifier.height(16.dp))
-            OutlinedButton(onClick = onResetMonth, modifier = Modifier.fillMaxWidth()) {
-                Text("Reset month (demo)")
-            }
-
-            Spacer(Modifier.height(12.dp))
-            Text(
-                "Demo note: quotas are local only. Next step is backend-tracked quotas + Twilio sending.",
-                style = MaterialTheme.typography.bodySmall
-            )
         }
     }
 }
