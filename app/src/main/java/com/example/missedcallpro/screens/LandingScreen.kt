@@ -26,7 +26,7 @@ import java.io.IOException
 
 @Composable
 fun LandingScreen(
-    onGoogleLogin:  (String) -> Unit
+    onGoogleLogin:  (String, String, String) -> Unit
 ) {
 
     val context = LocalContext.current
@@ -81,7 +81,7 @@ fun LandingScreen(
                             try {
                                 val resp = api.bootstrap()
                                 Log.d("logged resp",resp.toString())
-                                onGoogleLogin(resp.username)
+                                onGoogleLogin(resp.username,resp.access_token,resp.refresh_token)
                             } catch (e: HttpException) {
                                 err = when (e.code()) {
                                     else -> "Server error (${e.code()})."

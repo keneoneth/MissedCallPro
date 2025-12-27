@@ -1,5 +1,6 @@
 package com.example.missedcallpro.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -7,12 +8,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.missedcallpro.App
 import com.example.missedcallpro.auth.GoogleAuthClient
 import com.example.missedcallpro.data.AppState
 import com.example.missedcallpro.data.PlanTier
+import com.example.missedcallpro.data.remote.LogoutRequest
 import com.example.missedcallpro.ui.QuotaRow
 import com.example.missedcallpro.ui.ScreenScaffold
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 @Composable
 fun PlanQuotaScreen(
@@ -27,7 +31,8 @@ fun PlanQuotaScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val authRepo = GoogleAuthClient(context)
-
+    val app = LocalContext.current.applicationContext as App
+    val api = app.container.api
 
     ScreenScaffold(
         title = "Plan & Quotas",
@@ -35,8 +40,15 @@ fun PlanQuotaScreen(
             TextButton(onClick = {
 
                 scope.launch {
-                    authRepo.signOutUser()
-                    onSignOut()
+                    try {
+                        // 1. Tell the server first while we still have the token
+                        val resp = api.logout(LogoutRequest(state.refresh_token))
+                        Log.d("logged out resp", resp.toString())
+                        authRepo.signOutUser()
+                        onSignOut()
+                    } catch (e: Exception) {
+                        Log.e("Logout failed", e.message ?: "Server error")
+                    }
                 }
 
             }) {

@@ -10,6 +10,8 @@ private val Context.dataStore by preferencesDataStore(name = "missedcallpro_pref
 
 data class AppState(
     val username: String,
+    val access_token: String,
+    val refresh_token: String,
     val signedIn: Boolean,
     val plan: PlanTier,
     val quotas: Quotas,
@@ -21,6 +23,8 @@ class AppStateStore(private val context: Context) {
 
     private object Keys {
         val USERNAME = stringPreferencesKey("username")
+        val ACCESS_TOKEN = stringPreferencesKey("access_token")
+        val REFRESH_TOKEN = stringPreferencesKey("refresh_token")
         val SIGNED_IN = booleanPreferencesKey("signed_in")
         val PLAN = stringPreferencesKey("plan")
         val SMS_USED = intPreferencesKey("sms_used")
@@ -32,6 +36,9 @@ class AppStateStore(private val context: Context) {
     val state: Flow<AppState> = context.dataStore.data.map { prefs ->
         val plan = PlanTier.valueOf(prefs[Keys.PLAN] ?: PlanTier.FREE.name)
         val username = prefs[Keys.USERNAME] ?: ""
+        val access_token = prefs[Keys.ACCESS_TOKEN] ?: ""
+        val refresh_token = prefs[Keys.REFRESH_TOKEN] ?: ""
+
         val signedIn = prefs[Keys.SIGNED_IN] ?: false
         val smsUsed = prefs[Keys.SMS_USED] ?: 0
         val emailUsed = prefs[Keys.EMAIL_USED] ?: 0
@@ -41,6 +48,8 @@ class AppStateStore(private val context: Context) {
 
         AppState(
             username = username,
+            access_token = access_token,
+            refresh_token = refresh_token,
             signedIn = signedIn,
             plan = plan,
             quotas = Quotas(smsUsed = smsUsed, emailUsed = emailUsed),
@@ -52,6 +61,18 @@ class AppStateStore(private val context: Context) {
     suspend fun setUsername(value: String) {
         context.dataStore.edit {
             it[Keys.USERNAME] = value;
+        }
+    }
+
+    suspend fun setAccessToken(value: String) {
+        context.dataStore.edit {
+            it[Keys.ACCESS_TOKEN] = value;
+        }
+    }
+
+    suspend fun setRefreshToken(value: String) {
+        context.dataStore.edit {
+            it[Keys.REFRESH_TOKEN] = value;
         }
     }
 
