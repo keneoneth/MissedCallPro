@@ -1,12 +1,13 @@
 package com.example.missedcallpro.data
 
-import android.R
-
-data class PlanTier (
+data class PlanTier(
     val name: String,
     val smsLimit: Int,
     val emailLimit: Int,
-    val can_edit_templates: Boolean
+    val can_edit_templates: Boolean,
+    val status: String? = null,
+    val currentPeriodStart: String? = null,
+    val currentPeriodEnd: String? = null
 )
 
 data class Quotas(
@@ -30,4 +31,19 @@ data class PlanDto(
     val form_limit: Int,
     val can_edit_templates: Boolean,
     val is_active: Boolean
+)
+
+data class QuotaDto(
+    val limit: Int,
+    val used: Int,
+    val remaining: Int
+)
+
+data class SubscriptionDto(
+    val plan_id: String,
+    val status: String,
+    val current_period_start: String?, // ISO string, nullable
+    val current_period_end: String?,
+    val sms: QuotaDto,
+    val email: QuotaDto
 )

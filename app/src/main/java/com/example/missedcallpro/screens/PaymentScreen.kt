@@ -53,7 +53,6 @@ fun PaymentScreen(
             is PaymentUiState.Success -> {
 
                 PlanList(
-                    state = state,
                     plans = uiState.plans,
                     currentPlan = currentPlan,
                     padding = padding,
@@ -66,7 +65,6 @@ fun PaymentScreen(
 
 @Composable
 fun PlanList(
-    state: AppState,
     plans: List<PlanDto>,
     currentPlan: PlanTier,
     padding: PaddingValues,

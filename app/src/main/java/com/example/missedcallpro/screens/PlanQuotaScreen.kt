@@ -65,6 +65,10 @@ fun PlanQuotaScreen(
                     Text("Current Plan", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(6.dp))
                     Text(plan.name, style = MaterialTheme.typography.headlineSmall)
+                    if (plan.name != "Free") {
+                        Spacer(Modifier.height(10.dp))
+                        Text("("+plan.status+")", style = MaterialTheme.typography.titleMedium)
+                    }
 
                     if (!plan.can_edit_templates) {
                         Spacer(Modifier.height(10.dp))

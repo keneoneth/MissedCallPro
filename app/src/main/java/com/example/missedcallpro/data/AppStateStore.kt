@@ -26,6 +26,12 @@ class AppStateStore(private val context: Context) {
         val EMAIL = stringPreferencesKey("email")
         val SIGNED_IN = booleanPreferencesKey("signed_in")
         val PLAN = stringPreferencesKey("plan")
+        val PLAN_STATUS = stringPreferencesKey("plan_status")
+        val SMS_LIMIT = intPreferencesKey("sms_limit")
+        val EMAIL_LIMIT = intPreferencesKey("email_limit")
+        val EDIT_RIGHT = booleanPreferencesKey("edit_right")
+        val PERIOD_START = stringPreferencesKey("period_start")
+        val PERIOD_END = stringPreferencesKey("period_end")
         val SMS_USED = intPreferencesKey("sms_used")
         val EMAIL_USED = intPreferencesKey("email_used")
         val SMS_TEMPLATE = stringPreferencesKey("sms_template")
@@ -33,7 +39,15 @@ class AppStateStore(private val context: Context) {
     }
 
     val state: Flow<AppState> = context.dataStore.data.map { prefs ->
-        val plan = PlanTier(prefs[Keys.PLAN] ?: "",0,0, false)
+        val plan = PlanTier(
+            name = prefs[Keys.PLAN] ?: "",
+            status = prefs[Keys.PLAN_STATUS] ?: "",
+            smsLimit = prefs[Keys.SMS_LIMIT] ?: 0,
+            emailLimit = prefs[Keys.EMAIL_LIMIT] ?: 0,
+            can_edit_templates = prefs[Keys.EDIT_RIGHT] ?: false,
+            currentPeriodStart = prefs[Keys.PERIOD_START],
+            currentPeriodEnd = prefs[Keys.PERIOD_END]
+        )
         val username = prefs[Keys.USERNAME] ?: ""
         val email = prefs[Keys.EMAIL] ?: ""
 
@@ -74,17 +88,48 @@ class AppStateStore(private val context: Context) {
         context.dataStore.edit {
             it[Keys.SIGNED_IN] = false
             it[Keys.PLAN] = ""
+            it[Keys.PLAN_STATUS] = ""
             it[Keys.SMS_USED] = 0
             it[Keys.EMAIL_USED] = 0
+            it.remove(Keys.PERIOD_START)
+            it.remove(Keys.PERIOD_END)
             it.remove(Keys.SMS_TEMPLATE)
             it.remove(Keys.EMAIL_TEMPLATE)
+
         }
     }
 
-    suspend fun setPlan(plan: PlanTier) {
+    suspend fun setPlan(
+        plan: PlanTier
+    ) {
         context.dataStore.edit {
-            Log.d("Update plan name", plan.name)
             it[Keys.PLAN] = plan.name
+
+            it[Keys.SMS_LIMIT] = plan.smsLimit
+            it[Keys.EMAIL_LIMIT] = plan.emailLimit
+            it[Keys.EDIT_RIGHT] = plan.can_edit_templates
+
+            if (plan.status != null)
+                it[Keys.PLAN_STATUS] = plan.status
+            else
+                it.remove(Keys.PLAN_STATUS)
+
+            if (plan.currentPeriodStart != null)
+                it[Keys.PERIOD_START] = plan.currentPeriodStart
+            else
+                it.remove(Keys.PERIOD_START)
+
+            if (plan.currentPeriodEnd != null)
+                it[Keys.PERIOD_END] = plan.currentPeriodEnd
+            else
+                it.remove(Keys.PERIOD_END)
+        }
+    }
+
+    suspend fun setQuotas(smsUsed: Int, emailUsed: Int) {
+        context.dataStore.edit {
+            it[Keys.SMS_USED] = smsUsed
+            it[Keys.EMAIL_USED] = emailUsed
         }
     }
 

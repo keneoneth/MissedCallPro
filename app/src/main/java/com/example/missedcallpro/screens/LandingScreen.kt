@@ -77,7 +77,6 @@ fun LandingScreen(
                         if (user != null) {
                             try {
                                 val resp = api.bootstrap()
-                                Log.d("logged resp",resp.toString())
                                 onGoogleLogin(resp.username,resp.email)
                             } catch (e: HttpException) {
                                 err = when (e.code()) {
