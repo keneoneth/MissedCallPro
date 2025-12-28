@@ -30,7 +30,8 @@ data class PlanDto(
     val email_limit: Int,
     val form_limit: Int,
     val can_edit_templates: Boolean,
-    val is_active: Boolean
+    val is_active: Boolean,
+    val play_product_id: String?
 )
 
 data class QuotaDto(
@@ -46,4 +47,42 @@ data class SubscriptionDto(
     val current_period_end: String?,
     val sms: QuotaDto,
     val email: QuotaDto
+) {
+    companion object {
+        const val STATUS_ACTIVE = "active"
+        const val PLAN_FREE = "free"
+    }
+}
+
+data class GoogleConfirmReq(
+    val product_id: String,
+    val purchase_token: String,
+    val package_name: String? = null
+)
+
+data class GoogleConfirmResp(
+    val ok: Boolean,
+    val plan_id: String,
+    val status: String,
+    val cancel_at_period_end: Boolean,
+    val current_period_end: String?
+)
+
+data class GoogleRestoreItemReq(
+    val product_id: String,
+    val purchase_token: String,
+    val package_name: String? = null
+)
+
+data class GoogleRestoreReq(
+    val purchases: List<GoogleRestoreItemReq>,
+    val package_name: String? = null
+)
+
+data class GoogleRestoreResp(
+    val ok: Boolean,
+    val restored: Boolean,
+    val plan_id: String,
+    val status: String,
+    val current_period_end: String? = null
 )

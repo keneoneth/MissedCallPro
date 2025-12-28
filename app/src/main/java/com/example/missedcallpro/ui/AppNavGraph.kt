@@ -1,9 +1,12 @@
 package com.example.missedcallpro.ui
 
-import android.util.Log
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -77,12 +80,14 @@ fun AppNavGraph(
         }
 
         composable(Routes.PAYMENT) {
+
+            val context = LocalContext.current
+
             PaymentScreen(
-                state=state,
                 currentPlan = state.plan,
                 onBack = { nav.popBackStack() },
-                onSelectPlan = { selected ->
-                    PaymentActions.setPlanThenBack(nav, store, selected)
+                onManageSubscription = {
+                    PaymentActions.openManageSubscriptions(context)
                 }
             )
         }
@@ -129,15 +134,25 @@ private object TemplateActions {
 }
 
 private object PaymentActions {
-    @OptIn(DelicateCoroutinesApi::class)
-    fun setPlanThenBack(nav: NavHostController, store: AppStateStore, plan: com.example.missedcallpro.data.PlanTier) {
-        kotlinx.coroutines.GlobalScope.launch { store.setPlan(plan) }
-        nav.popBackStack()
+    fun openManageSubscriptions(context: Context) {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse("https://play.google.com/store/account/subscriptions")
+            setPackage("com.android.vending")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        runCatching { context.startActivity(intent) }
+            .onFailure {
+                // Fallback: open in browser if Play Store app isn't available
+                val web = Intent(Intent.ACTION_VIEW).apply {
+                    data = Uri.parse("https://play.google.com/store/account/subscriptions")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(web)
+            }
     }
 }
 
 private object AccountActions{
-    @OptIn(DelicateCoroutinesApi::class)
     fun deleteAccount(nav: NavHostController) {
         nav.navigate(Routes.LANDING) { popUpTo(Routes.PLAN) { inclusive = true } }
     }

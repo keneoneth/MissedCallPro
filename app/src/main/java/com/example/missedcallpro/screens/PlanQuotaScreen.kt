@@ -11,11 +11,9 @@ import androidx.compose.ui.unit.dp
 import com.example.missedcallpro.App
 import com.example.missedcallpro.auth.GoogleAuthClient
 import com.example.missedcallpro.data.AppState
-import com.example.missedcallpro.data.PlanTier
 import com.example.missedcallpro.ui.QuotaRow
 import com.example.missedcallpro.ui.ScreenScaffold
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
 
 @Composable
 fun PlanQuotaScreen(

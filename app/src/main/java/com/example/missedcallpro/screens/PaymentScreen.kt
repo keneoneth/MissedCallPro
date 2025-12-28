@@ -1,9 +1,10 @@
 package com.example.missedcallpro.screens
 
+import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -11,36 +12,48 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.missedcallpro.App
-import com.example.missedcallpro.data.AppState
 import com.example.missedcallpro.data.PaymentUiState
 import com.example.missedcallpro.data.PaymentViewModel
 import com.example.missedcallpro.data.PaymentViewModelFactory
 import com.example.missedcallpro.data.PlanDto
 import com.example.missedcallpro.data.PlanTier
+import com.example.missedcallpro.data.SubscriptionDto
 import com.example.missedcallpro.ui.ScreenScaffold
-
 
 private fun formatPrice(priceCents: Int, currency: String, period: String): String {
     if (priceCents <= 0) return "$0"
     val dollars = priceCents / 100
-    return "$$dollars / $period" // keep simple for now
+    return "$$dollars / $period"
 }
 
 @Composable
 fun PaymentScreen(
-    state: AppState,
     currentPlan: PlanTier,
     onBack: () -> Unit,
-    onSelectPlan: (PlanTier) -> Unit
+    onManageSubscription: () -> Unit
 ) {
+    val context = LocalContext.current
+    val activity = LocalContext.current as Activity
     val app = LocalContext.current.applicationContext as App
-    // Initialize ViewModel with our custom factory
+    val billing = remember { com.example.missedcallpro.data.billing.PlayBillingManagerImpl.create(activity) }
+
     val viewModel: PaymentViewModel = viewModel(
-        factory = PaymentViewModelFactory(app.container.api)
+        factory = PaymentViewModelFactory(app.container.api, billing)
     )
 
-    ScreenScaffold(title = "Upgrade", onBack = onBack) { padding ->
-        // Handle different UI states
+    LaunchedEffect(viewModel.purchaseState) {
+        val ps = viewModel.purchaseState
+        if (ps is com.example.missedcallpro.data.PurchaseState.Error) {
+            android.widget.Toast.makeText(context, ps.message, android.widget.Toast.LENGTH_LONG).show()
+            viewModel.clearPurchaseError()
+        }
+        if (ps is com.example.missedcallpro.data.PurchaseState.Success) {
+            onBack()
+        }
+    }
+
+    ScreenScaffold(title = "Upgrade",
+        onBack = onBack) { padding ->
         when (val uiState = viewModel.uiState) {
             is PaymentUiState.Loading -> {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -51,12 +64,14 @@ fun PaymentScreen(
                 Text("Error: ${uiState.message}", color = Color.Red)
             }
             is PaymentUiState.Success -> {
-
                 PlanList(
                     plans = uiState.plans,
                     currentPlan = currentPlan,
                     padding = padding,
-                    onSelectPlan = onSelectPlan
+                    onManageSubscription = onManageSubscription,
+                    onSubscribe = { plan ->
+                        viewModel.subscribeProduct(activity, plan)
+                    }
                 )
             }
         }
@@ -68,8 +83,47 @@ fun PlanList(
     plans: List<PlanDto>,
     currentPlan: PlanTier,
     padding: PaddingValues,
-    onSelectPlan: (PlanTier) -> Unit
+    onManageSubscription: () -> Unit,
+    onSubscribe: (PlanDto) -> Unit
 ) {
+    var showDialog by remember { mutableStateOf(false) }
+    var pendingPlan by remember { mutableStateOf<PlanDto?>(null) }
+
+    fun openConfirm(plan: PlanDto) {
+        pendingPlan = plan
+        showDialog = true
+    }
+
+    if (showDialog && pendingPlan != null) {
+        val p = pendingPlan!!
+        val isFree = p.id == SubscriptionDto.PLAN_FREE
+
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(if (isFree) "Manage subscription" else "Confirm purchase") },
+            text = {
+                if (isFree) {
+                    Text("To cancel or change your subscription, you’ll be taken to Google Play.")
+                } else {
+                    Text("Subscribe to ${p.name} for ${formatPrice(p.price_cents, p.currency, p.period)}?")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDialog = false
+                    if (isFree) {
+                        onManageSubscription()
+                    } else {
+                        onSubscribe(p)
+                    }
+                }) { Text("Confirm") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) { Text("Cancel") }
+            }
+        )
+    }
+
     LazyColumn(
         modifier = Modifier
             .padding(padding)
@@ -77,33 +131,28 @@ fun PlanList(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        item {
-            Text(
-                text = "Choose a plan",
-                style = MaterialTheme.typography.headlineSmall
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "Limits are per month. Templates editable on paid plans.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.height(16.dp))
-        }
-
-
-        items(plans.size ) { i ->
+        items(plans.size) { i ->
             val p = plans[i]
+            val isCurrent = currentPlan.name == p.name
+            val isFree = p.id == SubscriptionDto.PLAN_FREE
+            val userIsFree = currentPlan.name.equals(SubscriptionDto.PLAN_FREE, ignoreCase = true)
+
+            val buttonText = when {
+                isCurrent -> "Selected"
+                isFree && !userIsFree -> "Manage Subscription"
+                else -> "Subscribe"
+            }
+
             PlanCard(
                 title = p.name,
                 price = formatPrice(p.price_cents, p.currency, p.period),
                 sms = p.sms_limit,
                 email = p.email_limit,
                 editable = p.can_edit_templates,
-                selected = currentPlan.name == p.name,
+                selected = isCurrent,
+                buttonText = buttonText,
                 onClick = {
-                    val newPlan = PlanTier(p.name,p.sms_limit, p.email_limit, p.can_edit_templates)
-                    onSelectPlan(newPlan)
+                    if (!isCurrent) openConfirm(p)
                 }
             )
         }
@@ -118,10 +167,11 @@ private fun PlanCard(
     email: Int,
     editable: Boolean,
     selected: Boolean,
+    buttonText: String,
     onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = if (selected) MaterialTheme.colorScheme.secondaryContainer
             else MaterialTheme.colorScheme.surface
@@ -136,10 +186,14 @@ private fun PlanCard(
             Text("SMS: $sms / month")
             Text("Email: $email / month")
             Text("Template editing: ${if (editable) "Yes" else "No"}")
-
             Spacer(Modifier.height(12.dp))
-            Button(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-                Text(if (selected) "Selected" else "Select")
+
+            Button(
+                onClick = onClick,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !selected
+            ) {
+                Text(buttonText)
             }
         }
     }

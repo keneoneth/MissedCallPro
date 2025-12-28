@@ -1,5 +1,9 @@
 package com.example.missedcallpro.data.remote
 
+import com.example.missedcallpro.data.GoogleConfirmReq
+import com.example.missedcallpro.data.GoogleConfirmResp
+import com.example.missedcallpro.data.GoogleRestoreReq
+import com.example.missedcallpro.data.GoogleRestoreResp
 import com.example.missedcallpro.data.PlanDto
 import com.example.missedcallpro.data.SubscriptionDto
 import com.squareup.moshi.JsonClass
@@ -35,4 +39,10 @@ interface BackendApi {
 
     @GET("/subscriptions/me")
     suspend fun getSubscription(): SubscriptionDto
+
+    @POST("subscriptions/google/confirm")
+    suspend fun confirmGoogleSubscription(@Body req: GoogleConfirmReq): GoogleConfirmResp
+
+    @POST("subscriptions/google/restore")
+    suspend fun restoreGoogleSubscription(@Body req: GoogleRestoreReq): GoogleRestoreResp
 }

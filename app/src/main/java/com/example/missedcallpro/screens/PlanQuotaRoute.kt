@@ -11,16 +11,18 @@ import androidx.compose.ui.unit.dp
 import com.example.missedcallpro.App
 import com.example.missedcallpro.data.AppState
 import com.example.missedcallpro.data.AppStateStore
+import com.example.missedcallpro.data.GoogleRestoreItemReq
+import com.example.missedcallpro.data.GoogleRestoreReq
 import com.example.missedcallpro.data.PlanTier
 import com.example.missedcallpro.data.Quotas
+import com.example.missedcallpro.data.SubscriptionDto
+import com.example.missedcallpro.data.billing.BillingRestoreHelper
 import com.example.missedcallpro.ui.ScreenScaffold
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 
 private sealed class LoadState {
     data object Loading : LoadState()
@@ -47,6 +49,36 @@ fun PlanQuotaRoute(
 
     suspend fun load(): LoadState = coroutineScope {
         return@coroutineScope try {
+
+            // 1) Load from backend
+            val sub = withContext(Dispatchers.IO) { api.getSubscription() }
+
+            // 2) If already active paid, no restore
+            val isBackendPaidActive = sub.status == SubscriptionDto.STATUS_ACTIVE && sub.plan_id != SubscriptionDto.PLAN_FREE
+
+            if (!isBackendPaidActive) {
+
+                // 3) Backend says free/inactive -> check Play purchases
+                val billingRestore = BillingRestoreHelper(context)
+                val restorePurchases = billingRestore.getActiveSubscriptions()
+
+                if (restorePurchases.isNotEmpty()) {
+                    api.restoreGoogleSubscription(
+                        GoogleRestoreReq(
+                            purchases = restorePurchases.map {
+                                GoogleRestoreItemReq(
+                                    product_id = it.productId,
+                                    purchase_token = it.purchaseToken,
+                                    package_name = null
+                                )
+                            }
+                        )
+                    )
+                    // then re-fetch /subscriptions/me
+                }
+
+            }
+
             // Do network IO off main thread
             val (subResp, planResp) = withContext(Dispatchers.IO) {
                 val subResp = api.getSubscription()
@@ -119,7 +151,8 @@ fun PlanQuotaRoute(
                         .padding(padding)
                         .padding(16.dp)
                         .fillMaxSize(),
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text("Failed to load subscription.", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))

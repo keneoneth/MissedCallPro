@@ -113,7 +113,8 @@ fun AccountScreen(
 
                 Text(
                     "Deleting your account will remove your profile and associated data. " +
-                            "Some records (e.g., billing) may be retained if legally required.",
+                            "Some records (e.g., billing) may be retained if legally required." +
+                            "Subscription (if any) will be cancelled automatically",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

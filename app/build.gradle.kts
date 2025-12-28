@@ -90,5 +90,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 
+    // Android Billing
+    implementation("com.android.billingclient:billing-ktx:7.1.1")
 
 }
