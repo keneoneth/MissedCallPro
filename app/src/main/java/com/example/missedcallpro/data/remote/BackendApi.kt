@@ -1,5 +1,7 @@
 package com.example.missedcallpro.data.remote
 
+import com.example.missedcallpro.data.FeedbackCreate
+import com.example.missedcallpro.data.FeedbackResponse
 import com.example.missedcallpro.data.FilterNumberCreate
 import com.example.missedcallpro.data.FilterNumberOut
 import com.example.missedcallpro.data.FilterRuleUpdate
@@ -16,7 +18,6 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 @JsonClass(generateAdapter = true)
 data class BootstrapResponse(
@@ -69,4 +70,7 @@ interface BackendApi {
 
     @DELETE("filter-numbers/{id}")
     suspend fun deleteFilterNumber(@Path("id") id: Long): Map<String, Any>
+
+    @POST("feedback")
+    suspend fun submitFeedback(@Body body: FeedbackCreate): FeedbackResponse
 }

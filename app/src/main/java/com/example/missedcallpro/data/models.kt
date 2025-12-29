@@ -98,5 +98,25 @@ data class FilterRuleUpdate(
     val calling_codes: List<String>
 )
 
-data class FilterNumberOut(val id: Long, val e164_number: String, val label: String?)
-data class FilterNumberCreate(val e164_number: String, val label: String? = null)
+data class FilterNumberOut(
+    val id: Long,
+    val e164_number: String,
+    val label: String?
+)
+data class FilterNumberCreate(
+    val e164_number: String,
+    val label: String? = null
+)
+
+data class FeedbackCreate(
+    val message: String,
+    val app_version: String? = null,
+    val platform: String? = "android",
+    val device_id: String? = null,
+    val locale: String? = null,
+)
+
+data class FeedbackResponse(
+    val ok: Boolean,
+    val remaining_today: Int,
+)

@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -95,16 +96,22 @@ fun AppNavGraph(
 
         composable(Routes.MY_ACCOUNT) {
             AccountScreen(
-                state = state,
                 username = state.username,
                 email = state.email,
                 onBack = { nav.popBackStack() },
-                onConfirmDelete = {AccountActions.deleteAccount(nav)}
+                onConfirmDelete = {AccountActions.deleteAccount(nav)},
+                onOpenFeedback = { nav.navigate(Routes.FEEDBACK) }
             )
         }
 
         composable(Routes.FILTER_LIST) {
             FilterListRoute(
+                onBack = { nav.popBackStack() }
+            )
+        }
+
+        composable(Routes.FEEDBACK) {
+            FeedbackScreen (
                 onBack = { nav.popBackStack() }
             )
         }

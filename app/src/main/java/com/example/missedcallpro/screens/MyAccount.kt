@@ -47,11 +47,11 @@ import com.example.missedcallpro.ui.ScreenScaffold
  */
 @Composable
 fun AccountScreen(
-    state: AppState,
     username: String,
     email: String,
     onBack: () -> Unit,
     onConfirmDelete: suspend () -> Unit,
+    onOpenFeedback: () -> Unit
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var isDeleting by remember { mutableStateOf(false) }
@@ -99,7 +99,14 @@ fun AccountScreen(
                     )
                 }
             }
-
+            item {
+                OutlinedButton(
+                    onClick = onOpenFeedback,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Feedback")
+                }
+            }
             item {
                 Button(
                     onClick = { showDeleteDialog = true },
