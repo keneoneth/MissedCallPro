@@ -86,3 +86,17 @@ data class GoogleRestoreResp(
     val status: String,
     val current_period_end: String? = null
 )
+
+data class FilterUiState(
+    val mode: String = "none",            // "none" | "allow" | "block"
+    val callingCodes: List<String> = emptyList(),
+    val blockedNumbers: List<FilterNumberOut> = emptyList()
+)
+
+data class FilterRuleUpdate(
+    val mode: String,
+    val calling_codes: List<String>
+)
+
+data class FilterNumberOut(val id: Long, val e164_number: String, val label: String?)
+data class FilterNumberCreate(val e164_number: String, val label: String? = null)

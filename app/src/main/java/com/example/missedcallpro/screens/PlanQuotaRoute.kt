@@ -38,7 +38,8 @@ fun PlanQuotaRoute(
     onOpenEmailTemplate: () -> Unit,
     onUpgrade: () -> Unit,
     onViewMyAccount: () -> Unit,
-    onSignOut: () -> Unit
+    onSignOut: () -> Unit,
+    onOpenFilterList: () -> Unit
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as App
@@ -174,7 +175,8 @@ fun PlanQuotaRoute(
                 onOpenEmailTemplate = onOpenEmailTemplate,
                 onUpgrade = onUpgrade,
                 onViewMyAccount = onViewMyAccount,
-                onSignOut = onSignOut
+                onSignOut = onSignOut,
+                onOpenFilterList = onOpenFilterList
             )
         }
     }

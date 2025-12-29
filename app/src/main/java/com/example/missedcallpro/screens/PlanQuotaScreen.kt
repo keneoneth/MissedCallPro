@@ -22,7 +22,8 @@ fun PlanQuotaScreen(
     onOpenEmailTemplate: () -> Unit,
     onUpgrade: () -> Unit,
     onViewMyAccount: () -> Unit,
-    onSignOut: () -> Unit
+    onSignOut: () -> Unit,
+    onOpenFilterList: () -> Unit
 ) {
     val plan = state.plan
     val context = LocalContext.current
@@ -84,6 +85,13 @@ fun PlanQuotaScreen(
             Spacer(Modifier.height(16.dp))
             OutlinedButton(onClick = onViewMyAccount, modifier = Modifier.fillMaxWidth()) {
                 Text("My Account")
+            }
+            Spacer(Modifier.height(16.dp))
+            OutlinedButton(
+                onClick = onOpenFilterList,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Filter List")
             }
             Spacer(Modifier.height(16.dp))
             Text("Quotas", style = MaterialTheme.typography.titleLarge)

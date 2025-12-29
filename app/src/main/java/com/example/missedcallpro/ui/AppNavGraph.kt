@@ -53,7 +53,8 @@ fun AppNavGraph(
                 onOpenEmailTemplate = { nav.navigate(Routes.TEMPLATE_EMAIL) },
                 onUpgrade = { nav.navigate(Routes.PAYMENT) },
                 onViewMyAccount = { nav.navigate(Routes.MY_ACCOUNT) },
-                onSignOut = { PlanActions.signOut(nav, store) }
+                onSignOut = { PlanActions.signOut(nav, store) },
+                onOpenFilterList = { nav.navigate(Routes.FILTER_LIST) }
             )
         }
 
@@ -99,6 +100,12 @@ fun AppNavGraph(
                 email = state.email,
                 onBack = { nav.popBackStack() },
                 onConfirmDelete = {AccountActions.deleteAccount(nav)}
+            )
+        }
+
+        composable(Routes.FILTER_LIST) {
+            FilterListRoute(
+                onBack = { nav.popBackStack() }
             )
         }
     }
