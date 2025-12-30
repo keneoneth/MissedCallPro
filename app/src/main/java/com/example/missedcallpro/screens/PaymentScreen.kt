@@ -16,7 +16,7 @@ import com.example.missedcallpro.data.PaymentUiState
 import com.example.missedcallpro.data.PaymentViewModel
 import com.example.missedcallpro.data.PaymentViewModelFactory
 import com.example.missedcallpro.data.PlanDto
-import com.example.missedcallpro.data.PlanTier
+import com.example.missedcallpro.data.PlanState
 import com.example.missedcallpro.data.SubscriptionDto
 import com.example.missedcallpro.ui.ScreenScaffold
 
@@ -28,7 +28,7 @@ private fun formatPrice(priceCents: Int, currency: String, period: String): Stri
 
 @Composable
 fun PaymentScreen(
-    currentPlan: PlanTier,
+    currentPlan: PlanState,
     onBack: () -> Unit,
     onManageSubscription: () -> Unit
 ) {
@@ -81,7 +81,7 @@ fun PaymentScreen(
 @Composable
 fun PlanList(
     plans: List<PlanDto>,
-    currentPlan: PlanTier,
+    currentPlan: PlanState,
     padding: PaddingValues,
     onManageSubscription: () -> Unit,
     onSubscribe: (PlanDto) -> Unit

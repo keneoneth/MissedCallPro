@@ -1,6 +1,6 @@
 package com.example.missedcallpro.data
 
-data class PlanTier(
+data class PlanState(
     val name: String,
     val smsLimit: Int,
     val emailLimit: Int,

@@ -27,7 +27,7 @@ fun AppNavGraph(
             username = "",
             email = "",
             signedIn = false,
-            plan = com.example.missedcallpro.data.PlanTier("",0,0,false),
+            plan = com.example.missedcallpro.data.PlanState("",0,0,false),
             quotas = com.example.missedcallpro.data.Quotas(0, 0),
             smsTemplate = com.example.missedcallpro.data.Defaults.SMS_TEMPLATE,
             emailTemplate = com.example.missedcallpro.data.Defaults.EMAIL_TEMPLATE

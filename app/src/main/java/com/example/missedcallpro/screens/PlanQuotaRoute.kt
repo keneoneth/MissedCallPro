@@ -13,7 +13,7 @@ import com.example.missedcallpro.data.AppState
 import com.example.missedcallpro.data.AppStateStore
 import com.example.missedcallpro.data.GoogleRestoreItemReq
 import com.example.missedcallpro.data.GoogleRestoreReq
-import com.example.missedcallpro.data.PlanTier
+import com.example.missedcallpro.data.PlanState
 import com.example.missedcallpro.data.Quotas
 import com.example.missedcallpro.data.SubscriptionDto
 import com.example.missedcallpro.data.billing.BillingRestoreHelper
@@ -88,7 +88,7 @@ fun PlanQuotaRoute(
             }
             val planDto = planResp.first { it.id == subResp.plan_id }
 
-            val planTier = PlanTier(
+            val planState = PlanState(
                 name = planDto.name,
                 smsLimit = planDto.sms_limit,
                 emailLimit = planDto.email_limit,
@@ -98,7 +98,7 @@ fun PlanQuotaRoute(
                 status = subResp.status
             )
             val updateTask = async {
-                store.setPlan(planTier)
+                store.setPlan(planState)
                 store.setQuotas(
                     smsUsed = subResp.sms.used,
                     emailUsed = subResp.email.used
@@ -107,7 +107,7 @@ fun PlanQuotaRoute(
             updateTask.await()
 
             val newState = state.copy(
-                plan = planTier,
+                plan = planState,
                 quotas = Quotas(
                     smsUsed = subResp.sms.used,
                     emailUsed = subResp.email.used

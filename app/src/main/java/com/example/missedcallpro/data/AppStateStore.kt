@@ -13,7 +13,7 @@ data class AppState(
     val username: String,
     val email: String,
     val signedIn: Boolean,
-    val plan: PlanTier,
+    val plan: PlanState,
     val quotas: Quotas,
     val smsTemplate: String,
     val emailTemplate: String
@@ -39,7 +39,7 @@ class AppStateStore(private val context: Context) {
     }
 
     val state: Flow<AppState> = context.dataStore.data.map { prefs ->
-        val plan = PlanTier(
+        val plan = PlanState(
             name = prefs[Keys.PLAN] ?: "",
             status = prefs[Keys.PLAN_STATUS] ?: "",
             smsLimit = prefs[Keys.SMS_LIMIT] ?: 0,
@@ -100,7 +100,7 @@ class AppStateStore(private val context: Context) {
     }
 
     suspend fun setPlan(
-        plan: PlanTier
+        plan: PlanState
     ) {
         context.dataStore.edit {
             it[Keys.PLAN] = plan.name
