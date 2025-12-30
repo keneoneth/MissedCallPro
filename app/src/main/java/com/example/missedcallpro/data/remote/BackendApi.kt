@@ -1,5 +1,6 @@
 package com.example.missedcallpro.data.remote
 
+import com.example.missedcallpro.data.DeviceMissedCallRequest
 import com.example.missedcallpro.data.FeedbackCreate
 import com.example.missedcallpro.data.FeedbackResponse
 import com.example.missedcallpro.data.FilterNumberCreate
@@ -9,6 +10,7 @@ import com.example.missedcallpro.data.GoogleConfirmReq
 import com.example.missedcallpro.data.GoogleConfirmResp
 import com.example.missedcallpro.data.GoogleRestoreReq
 import com.example.missedcallpro.data.GoogleRestoreResp
+import com.example.missedcallpro.data.OkResponse
 import com.example.missedcallpro.data.PlanDto
 import com.example.missedcallpro.data.SubscriptionDto
 import com.squareup.moshi.JsonClass
@@ -73,4 +75,9 @@ interface BackendApi {
 
     @POST("feedback")
     suspend fun submitFeedback(@Body body: FeedbackCreate): FeedbackResponse
+
+    @POST("device/missed-call")
+    suspend fun reportDeviceMissedCall(
+        @Body body: DeviceMissedCallRequest
+    ): OkResponse
 }

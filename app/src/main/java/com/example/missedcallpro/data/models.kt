@@ -120,3 +120,10 @@ data class FeedbackResponse(
     val ok: Boolean,
     val remaining_today: Int,
 )
+
+data class DeviceMissedCallRequest(
+    val from_number: String,
+    val occurred_at_ms: Long
+)
+
+data class OkResponse(val ok: Boolean)

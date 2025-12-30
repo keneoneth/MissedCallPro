@@ -1,10 +1,15 @@
 package com.example.missedcallpro.screens
 
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -13,8 +18,52 @@ import com.example.missedcallpro.auth.GoogleAuthClient
 import com.example.missedcallpro.data.AppState
 import com.example.missedcallpro.ui.QuotaRow
 import com.example.missedcallpro.ui.ScreenScaffold
+import com.example.missedcallpro.util.getPhonePermState
 import kotlinx.coroutines.launch
+import android.Manifest
+import android.widget.Toast
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 
+@Composable
+fun PhonePermissionCard() {
+    val ctx = LocalContext.current
+    var permState by remember { mutableStateOf(getPhonePermState(ctx)) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        permState = getPhonePermState(ctx)
+
+        val grantedAll = results[Manifest.permission.READ_PHONE_STATE] == true &&
+                results[Manifest.permission.READ_CALL_LOG] == true
+
+        if (grantedAll) {
+            Toast.makeText(ctx, "Permissions granted. Missed-call auto-reply enabled.", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(ctx, "Permissions needed to detect missed calls.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    if (!permState.allGranted) {
+        Card(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp)) {
+                Text("Enable missed-call auto-reply here.")
+
+                Button(onClick = {
+                    launcher.launch(arrayOf(
+                        Manifest.permission.READ_PHONE_STATE,
+                        Manifest.permission.READ_CALL_LOG
+                    ))
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Grant permissions")
+                }
+            }
+        }
+    }
+}
 @Composable
 fun PlanQuotaScreen(
     state: AppState,
@@ -31,6 +80,11 @@ fun PlanQuotaScreen(
     val authRepo = GoogleAuthClient(context)
     val app = LocalContext.current.applicationContext as App
     val api = app.container.api
+
+    // Re-check permission on every recomposition
+    val permState by remember {
+        derivedStateOf { getPhonePermState(context) }
+    }
 
     ScreenScaffold(
         title = "Plan & Quotas",
@@ -59,6 +113,10 @@ fun PlanQuotaScreen(
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
+            if (!permState.allGranted) {
+                PhonePermissionCard()
+            }
+            Spacer(Modifier.height(16.dp))
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp)) {
                     Text("Current Plan", style = MaterialTheme.typography.titleMedium)

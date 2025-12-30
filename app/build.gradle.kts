@@ -19,7 +19,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "BACKEND_URL", "\"https://9e4d634afb3d.ngrok-free.app\"")
+        buildConfigField("String", "BACKEND_URL", "\"https://maudie-mythical-enriqueta.ngrok-free.dev\"")
     }
 
     buildTypes {
@@ -92,5 +92,8 @@ dependencies {
 
     // Android Billing
     implementation("com.android.billingclient:billing-ktx:7.1.1")
+
+    implementation("androidx.work:work-runtime:2.9.1")
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
 
 }
