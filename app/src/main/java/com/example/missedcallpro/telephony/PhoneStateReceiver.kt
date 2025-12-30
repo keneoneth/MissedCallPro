@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.telephony.TelephonyManager
 import android.util.Log
+import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
@@ -52,7 +53,12 @@ class PhoneStateReceiver : BroadcastReceiver() {
                     val req = OneTimeWorkRequestBuilder<MissedCallWorker>()
                         .setInputData(workDataOf("event_ts_ms" to System.currentTimeMillis()))
                         .build()
-                    WorkManager.getInstance(context).enqueue(req)
+                    val bucket = System.currentTimeMillis() / 1000
+                    val workName = "missed_call_${bucket}"
+                    WorkManager.getInstance(context).enqueueUniqueWork(
+                        workName,
+                        ExistingWorkPolicy.KEEP,
+                        req)
                 }
                 sawRinging = false
                 sawOffhook = false
