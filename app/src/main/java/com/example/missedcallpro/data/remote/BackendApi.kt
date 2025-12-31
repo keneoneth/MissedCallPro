@@ -1,6 +1,7 @@
 package com.example.missedcallpro.data.remote
 
 import com.example.missedcallpro.data.DeviceMissedCallRequest
+import com.example.missedcallpro.data.DeviceMissedCallResponse
 import com.example.missedcallpro.data.FeedbackCreate
 import com.example.missedcallpro.data.FeedbackResponse
 import com.example.missedcallpro.data.FilterNumberCreate
@@ -80,7 +81,7 @@ interface BackendApi {
     @POST("device/missed-call")
     suspend fun reportDeviceMissedCall(
         @Body body: DeviceMissedCallRequest
-    ): OkResponse
+    ): DeviceMissedCallResponse
 
     @GET("/settings/sms")
     suspend fun getSmsSettings(): SmsSettingsDto

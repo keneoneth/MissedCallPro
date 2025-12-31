@@ -89,7 +89,6 @@ fun CompanyNameWarning(companyName: String, onOpenSmsTemplate: () -> Unit) {
 @Composable
 fun PlanQuotaScreen(
     state: AppState,
-    store: AppStateStore,
     onOpenSmsTemplate: () -> Unit,
     onUpgrade: () -> Unit,
     onViewMyAccount: () -> Unit,
@@ -103,36 +102,23 @@ fun PlanQuotaScreen(
     val app = LocalContext.current.applicationContext as App
     val api = app.container.api
 
-    // Re-check permission on every recomposition
-    val permState by remember {
-        derivedStateOf { getPhonePermState(context) }
-    }
-
-    var companyName by remember { mutableStateOf("") }
-
-    LaunchedEffect(Unit) {
-        companyName = store.getCompanyName()
-    }
+    val permState by remember { derivedStateOf { getPhonePermState(context) } }
 
     ScreenScaffold(
         title = "Plan & Quotas",
         actions = {
             TextButton(onClick = {
-
                 scope.launch {
                     try {
                         val resp = api.logout()
-                        assert(resp.ok)
+                        check(resp.ok)
                         authRepo.signOutUser()
                         onSignOut()
                     } catch (e: Exception) {
                         Log.e("Logout failed", e.message ?: "Server error")
                     }
                 }
-
-            }) {
-                Text("Sign out")
-            }
+            }) { Text("Sign out") }
         }
     ) { padding ->
         Column(
@@ -141,10 +127,12 @@ fun PlanQuotaScreen(
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
-            if (!permState.allGranted) {
-                PhonePermissionCard()
-            }
-            CompanyNameWarning(companyName = companyName, onOpenSmsTemplate=onOpenSmsTemplate)
+            if (!permState.allGranted) PhonePermissionCard()
+
+            CompanyNameWarning(
+                companyName = state.companyName,
+                onOpenSmsTemplate = onOpenSmsTemplate
+            )
 
             Spacer(Modifier.height(16.dp))
             Card(Modifier.fillMaxWidth()) {
@@ -154,33 +142,32 @@ fun PlanQuotaScreen(
                     Text(plan.name, style = MaterialTheme.typography.headlineSmall)
                     if (plan.name != "Free") {
                         Spacer(Modifier.height(10.dp))
-                        Text("("+plan.status+")", style = MaterialTheme.typography.titleMedium)
+                        Text("(${plan.status})", style = MaterialTheme.typography.titleMedium)
                     }
 
+                    Spacer(Modifier.height(10.dp))
                     if (!plan.can_edit_templates) {
-                        Spacer(Modifier.height(10.dp))
                         Button(onClick = onUpgrade, modifier = Modifier.fillMaxWidth()) {
                             Text("Upgrade →")
                         }
                     } else {
-                        Spacer(Modifier.height(10.dp))
                         OutlinedButton(onClick = onUpgrade, modifier = Modifier.fillMaxWidth()) {
                             Text("Change Plan")
                         }
                     }
                 }
             }
+
             Spacer(Modifier.height(16.dp))
             OutlinedButton(onClick = onViewMyAccount, modifier = Modifier.fillMaxWidth()) {
                 Text("My Account")
             }
+
             Spacer(Modifier.height(16.dp))
-            OutlinedButton(
-                onClick = onOpenFilterList,
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            OutlinedButton(onClick = onOpenFilterList, modifier = Modifier.fillMaxWidth()) {
                 Text("Filter List")
             }
+
             Spacer(Modifier.height(16.dp))
             Text("Quotas", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(8.dp))
@@ -197,7 +184,7 @@ fun PlanQuotaScreen(
                 limit = plan.emailLimit,
                 onClick = null
             )
-
         }
     }
 }
+

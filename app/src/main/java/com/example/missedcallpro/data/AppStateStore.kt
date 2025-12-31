@@ -19,7 +19,25 @@ data class AppState(
     val smsTemplate: String,
     val companyName: String,
     val includeFormLinkInSms: Boolean
-)
+) {
+    companion object {
+        fun initial(): AppState {
+            return AppState(
+                username = "",
+                email = "",
+                signedIn = false,
+                plan = PlanState.initial(),
+                quotas = Quotas(
+                    smsUsed = 0,
+                    emailUsed = 0
+                ),
+                smsTemplate = Defaults.SMS_TEMPLATE,
+                companyName = "",
+                includeFormLinkInSms = true
+            )
+        }
+    }
+}
 
 class AppStateStore(private val context: Context) {
 

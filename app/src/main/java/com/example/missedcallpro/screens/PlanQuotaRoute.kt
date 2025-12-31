@@ -8,13 +8,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.missedcallpro.App
 import com.example.missedcallpro.data.AppState
 import com.example.missedcallpro.data.AppStateStore
 import com.example.missedcallpro.data.GoogleRestoreItemReq
 import com.example.missedcallpro.data.GoogleRestoreReq
 import com.example.missedcallpro.data.PlanState
-import com.example.missedcallpro.data.Quotas
 import com.example.missedcallpro.data.SubscriptionDto
 import com.example.missedcallpro.data.billing.BillingRestoreHelper
 import com.example.missedcallpro.ui.ScreenScaffold
@@ -26,13 +26,12 @@ import kotlinx.coroutines.coroutineScope
 
 private sealed class LoadState {
     data object Loading : LoadState()
-    data class Ready(val screenState: AppState) : LoadState()
+    data object Ready: LoadState()
     data class Error(val message: String) : LoadState()
 }
 
 @Composable
 fun PlanQuotaRoute(
-    state: AppState,
     store: AppStateStore,
     onOpenSmsTemplate: () -> Unit,
     onUpgrade: () -> Unit,
@@ -43,6 +42,10 @@ fun PlanQuotaRoute(
     val context = LocalContext.current
     val app = context.applicationContext as App
     val api = app.container.api
+
+    val uiState by store.state.collectAsStateWithLifecycle(
+        initialValue = AppState.initial() // add an initial() factory if you don’t have one
+    )
 
     var loadState by remember { mutableStateOf<LoadState>(LoadState.Loading) }
     var reloadKey by remember { mutableIntStateOf(0) }
@@ -105,15 +108,7 @@ fun PlanQuotaRoute(
             }
             updateTask.await()
 
-            val newState = state.copy(
-                plan = planState,
-                quotas = Quotas(
-                    smsUsed = subResp.sms.used,
-                    emailUsed = subResp.email.used
-                )
-            )
-
-            LoadState.Ready(newState)
+            LoadState.Ready
         } catch (e: HttpException) {
             val msg = "HTTP ${e.code()} loading subscription"
             Log.e("PlanQuotaRoute", msg, e)
@@ -169,8 +164,7 @@ fun PlanQuotaRoute(
 
         is LoadState.Ready -> {
             PlanQuotaScreen(
-                state = s.screenState,
-                store = store,
+                state = uiState,
                 onOpenSmsTemplate = onOpenSmsTemplate,
                 onUpgrade = onUpgrade,
                 onViewMyAccount = onViewMyAccount,

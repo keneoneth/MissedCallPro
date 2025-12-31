@@ -8,7 +8,21 @@ data class PlanState(
     val status: String? = null,
     val currentPeriodStart: String? = null,
     val currentPeriodEnd: String? = null
-)
+) {
+    companion object {
+        fun initial(): PlanState {
+            return PlanState(
+                name = "Free",
+                smsLimit = 0,
+                emailLimit = 0,
+                can_edit_templates = false,
+                currentPeriodStart = null,
+                currentPeriodEnd = null,
+                status = "free"
+            )
+        }
+    }
+}
 
 data class Quotas(
     val smsUsed: Int,
@@ -122,6 +136,12 @@ data class FeedbackResponse(
 data class DeviceMissedCallRequest(
     val from_number: String,
     val occurred_at_ms: Long
+)
+
+data class DeviceMissedCallResponse(
+    val ok: Boolean = true,
+    val sms_used: Int,
+    val email_used: Int
 )
 
 data class SmsSettingsDto(

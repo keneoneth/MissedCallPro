@@ -41,11 +41,15 @@ class MissedCallWorker(
 
         try {
             val timestamp = inputData.getLong("event_ts_ms", 0L)
-            api.reportDeviceMissedCall(
+            val resp = api.reportDeviceMissedCall(
                 body = DeviceMissedCallRequest(
                     from_number = missedNumber,
                     occurred_at_ms = timestamp,
                 )
+            )
+            app.store.setQuotas(
+                smsUsed = resp.sms_used,
+                emailUsed = resp.email_used
             )
             Log.d(TAG, "Reported missed call: $missedNumber")
             return Result.success()

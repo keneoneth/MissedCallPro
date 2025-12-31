@@ -49,7 +49,6 @@ fun AppNavGraph(
 
         composable(Routes.PLAN) {
             PlanQuotaRoute(
-                state = state,
                 store = store,
                 onOpenSmsTemplate = { nav.navigate(Routes.TEMPLATE_SMS) },
                 onUpgrade = { nav.navigate(Routes.PAYMENT) },
