@@ -1,6 +1,7 @@
 package com.example.missedcallpro.screens
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,16 +13,42 @@ import com.example.missedcallpro.data.AppState
 import com.example.missedcallpro.data.SmsSettingsDto
 import com.example.missedcallpro.ui.ScreenScaffold
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 private const val PH_COMPANY = "{{COMPANY}}"
 private const val PH_FORM_LINK = "{{FORM_LINK}}"
 
-private fun removeFormLinkToken(s: String): String {
-    // Remove token and clean extra spaces
-    return s.replace(PH_FORM_LINK, "")
-        .replace("  ", " ")
-        .replace("  ", " ")
-        .trim()
+// NOTE: We keep the token in the template always.
+// When includeLink is OFF, we exclude its contribution from the character count.
+// We do NOT remove it from the stored template, so free users can re-enable later.
+
+fun computeRenderedSmsLength(
+    template: String,
+    companyName: String,
+    includeLink: Boolean
+): Int {
+    var s = template
+
+    // Replace company token with actual company name
+    s = s.replace(PH_COMPANY, companyName.trim())
+
+    // Link token contribution:
+    // - If ON: count as reserved fixed length
+    // - If OFF: count as 0 chars but keep token in template (so we replace with "")
+    s = if (includeLink) {
+        s.replace(PH_FORM_LINK, "x".repeat(SmsLimits.FORM_LINK_RESERVED_CHARS))
+    } else {
+        s.replace(PH_FORM_LINK, "")
+    }
+
+    // Normalize whitespace similarly to backend
+    s = s.replace(Regex("\\s+"), " ").trim()
+
+    return s.length
+}
+
+fun smsMaxAllowedChars(includeLink: Boolean): Int {
+    return SmsLimits.SMS_TOTAL_CHARS
 }
 
 @Composable
@@ -32,7 +59,8 @@ fun TemplateScreen(
     onUpgrade: () -> Unit,
     saveSmsSettings: (company: String, template: String, includeLink: Boolean) -> Unit
 ) {
-    val app = LocalContext.current.applicationContext as App
+    val ctx = LocalContext.current
+    val app = ctx.applicationContext as App
     val api = app.container.api
     val isPaid = state.plan.can_edit_templates
 
@@ -43,16 +71,31 @@ fun TemplateScreen(
     var includeLink by remember(state.includeFormLinkInSms) { mutableStateOf(state.includeFormLinkInSms) }
     var editingTemplate by remember(state.smsTemplate) { mutableStateOf(state.smsTemplate) }
 
-    val isChanged = companyName.trim() != state.companyName ||
-        includeLink != state.includeFormLinkInSms ||
-        editingTemplate != state.smsTemplate
+    val companyTrimmed = companyName.trim()
+    val companyMissing = companyTrimmed.isBlank()
 
-    // Warnings
-    val companyMissing = companyName.trim().isBlank()
-    val needsRemovedFormLinkWarning = !includeLink && editingTemplate.contains(PH_FORM_LINK)
+    // Company length limit
+    val companyMax = SmsLimits.COMPANY_NAME_MAX_CHARS
+    val companyTooLong = companyTrimmed.length > companyMax
 
-    // If user disables link: remove token automatically
+    // Warnings about the link token presence (template stays unchanged)
+    val tokenPresent = editingTemplate.contains(PH_FORM_LINK)
+    val needsRemovedFormLinkWarning = !includeLink && tokenPresent
+    val needsAddFormLinkWarning = includeLink && !tokenPresent
+
+    // Rendered-length enforcement (company + optional reserved link counted)
+    val renderedLen = remember(companyTrimmed, includeLink, editingTemplate) {
+        computeRenderedSmsLength(editingTemplate, companyTrimmed, includeLink)
+    }
+    val maxLen = SmsLimits.SMS_TOTAL_CHARS
+    val overLimit = renderedLen > maxLen
+
+    val isChanged = companyTrimmed != state.companyName ||
+            includeLink != state.includeFormLinkInSms ||
+            editingTemplate != state.smsTemplate
+
     fun onToggleIncludeLink(newValue: Boolean) {
+        // Do NOT edit the template. Only switch the flag.
         includeLink = newValue
     }
 
@@ -79,13 +122,28 @@ fun TemplateScreen(
                 Column(Modifier.padding(16.dp)) {
                     Text("Company Name", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))
+
                     OutlinedTextField(
                         value = companyName,
-                        onValueChange = { companyName = it },
+                        onValueChange = { newValue ->
+                            // Hard cap at 80 chars (keeps app + backend consistent)
+                            companyName = if (newValue.length <= companyMax) newValue else newValue.take(companyMax)
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
+                        isError = companyTooLong,
+                        supportingText = { Text("${companyTrimmed.length}/$companyMax") },
                         placeholder = { Text("e.g., ABC Plumbing Inc.") }
                     )
+
+                    if (companyTooLong) {
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "Company Name must be at most $companyMax characters.",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
 
                     Spacer(Modifier.height(16.dp))
 
@@ -97,7 +155,7 @@ fun TemplateScreen(
                             Text("Include Active Form Link", style = MaterialTheme.typography.titleMedium)
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                "If OFF, we won't insert the form link into SMS.",
+                                "If OFF, we won’t insert the form link into SMS (and it won’t count toward the limit).",
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
@@ -110,7 +168,16 @@ fun TemplateScreen(
                     if (needsRemovedFormLinkWarning) {
                         Spacer(Modifier.height(10.dp))
                         Text(
-                            "Form link is disabled, but your SMS template does not include $PH_FORM_LINK. It will be automatically removed when sms is sent.",
+                            "Form link is disabled, but your SMS template contains $PH_FORM_LINK. The token will be ignored (not inserted) when sending.",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+
+                    if (needsAddFormLinkWarning) {
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            "Form link is enabled, but your template does not include $PH_FORM_LINK. Add it if you want the link to appear.",
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall
                         )
@@ -126,6 +193,20 @@ fun TemplateScreen(
                         onClick = { showEditor = true },
                         modifier = Modifier.fillMaxWidth()
                     ) { Text("Edit") }
+
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = "Rendered length: $renderedLen / $maxLen",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (overLimit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (overLimit) {
+                        Text(
+                            text = "Too long. Shorten the SMS (company + optional link budget are included).",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
 
@@ -135,23 +216,31 @@ fun TemplateScreen(
             Button(
                 onClick = {
                     scope.launch {
-                        val templateToSave = if (isPaid) editingTemplate else state.smsTemplate
-                        val resp = api.putSmsSettings(
-                            SmsSettingsDto(
-                                company_name = companyName.trim(),
-                                sms_template = templateToSave,
-                                include_form_link = includeLink
-                            )
-                        )
-                        saveSmsSettings(resp.company_name, resp.sms_template, resp.include_form_link)
-                        showEditor = false
-                        Log.d("show local:",companyName.trim()+"|"+templateToSave+"|"+includeLink)
-                        Log.d("show diff:",resp.company_name+"|"+resp.sms_template+"|"+resp.include_form_link)
-                        Log.d("show state:",state.companyName+"|"+state.smsTemplate+"|"+state.includeFormLinkInSms)
+                        try {
+                            val templateToSave = if (isPaid) editingTemplate else state.smsTemplate
 
+                            val resp = api.putSmsSettings(
+                                SmsSettingsDto(
+                                    company_name = companyTrimmed,
+                                    sms_template = templateToSave,
+                                    include_form_link = includeLink
+                                )
+                            )
+
+                            saveSmsSettings(resp.company_name, resp.sms_template, resp.include_form_link)
+                            showEditor = false
+                            
+                        } catch (e: HttpException) {
+                            Toast.makeText(ctx, "Save rejected.", Toast.LENGTH_SHORT).show()
+                            Log.e("TemplateScreen", "HTTP ${e.code()}", e)
+                        } catch (e: Exception) {
+                            Toast.makeText(ctx, "Save failed.", Toast.LENGTH_SHORT).show()
+                            Log.e("TemplateScreen", "Save failed", e)
+                        }
                     }
                 },
-                enabled = isChanged,
+                // Save blocked if over SMS limit or company name too long
+                enabled = isChanged && !overLimit && !companyTooLong,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Save Settings")
@@ -200,7 +289,10 @@ fun TemplateScreen(
                         AssistChip(
                             onClick = {
                                 if (isPaid) {
-                                    editingTemplate += " $PH_FORM_LINK"
+                                    // Avoid duplicates
+                                    if (!editingTemplate.contains(PH_FORM_LINK)) {
+                                        editingTemplate += " $PH_FORM_LINK"
+                                    }
                                 }
                             },
                             label = { Text("Insert Form Link") }
