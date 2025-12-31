@@ -1,11 +1,16 @@
 package com.example.missedcallpro
 import android.app.Application
-import android.util.Log
-import com.google.firebase.FirebaseApp
+import com.example.missedcallpro.data.AppStateStore
+
 class App : Application() {
-    val container by lazy { AppContainer() }
+    lateinit var store: AppStateStore
+        private set
+    lateinit var container: AppContainer
+        private set
+
     override fun onCreate() {
         super.onCreate()
-
+        store = AppStateStore(this)
+        container = AppContainer()
     }
 }

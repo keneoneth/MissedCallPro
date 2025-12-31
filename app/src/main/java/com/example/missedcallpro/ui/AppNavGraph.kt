@@ -30,7 +30,8 @@ fun AppNavGraph(
             plan = com.example.missedcallpro.data.PlanState("",0,0,false),
             quotas = com.example.missedcallpro.data.Quotas(0, 0),
             smsTemplate = com.example.missedcallpro.data.Defaults.SMS_TEMPLATE,
-            emailTemplate = com.example.missedcallpro.data.Defaults.EMAIL_TEMPLATE
+            companyName = "",
+            includeFormLinkInSms = true
         )
     )
 
@@ -51,7 +52,6 @@ fun AppNavGraph(
                 state = state,
                 store = store,
                 onOpenSmsTemplate = { nav.navigate(Routes.TEMPLATE_SMS) },
-                onOpenEmailTemplate = { nav.navigate(Routes.TEMPLATE_EMAIL) },
                 onUpgrade = { nav.navigate(Routes.PAYMENT) },
                 onViewMyAccount = { nav.navigate(Routes.MY_ACCOUNT) },
                 onSignOut = { PlanActions.signOut(nav, store) },
@@ -63,21 +63,12 @@ fun AppNavGraph(
             TemplateScreen(
                 title = "SMS Template",
                 state = state,
-                type = com.example.missedcallpro.data.TemplateType.SMS,
                 onBack = { nav.popBackStack() },
-                onEditBlocked = { nav.navigate(Routes.PAYMENT) },
-                onSave = { newText -> TemplateActions.saveTemplate(store, com.example.missedcallpro.data.TemplateType.SMS, newText) }
-            )
-        }
-
-        composable(Routes.TEMPLATE_EMAIL) {
-            TemplateScreen(
-                title = "Email Template",
-                state = state,
-                type = com.example.missedcallpro.data.TemplateType.EMAIL,
-                onBack = { nav.popBackStack() },
-                onEditBlocked = { nav.navigate(Routes.PAYMENT) },
-                onSave = { newText -> TemplateActions.saveTemplate(store, com.example.missedcallpro.data.TemplateType.EMAIL, newText) }
+                onUpgrade = { nav.navigate(Routes.PAYMENT) },
+                saveSmsSettings = {
+                    company,template,includeLink -> TemplateActions.saveSmsSettings(
+                    store,company, template,includeLink)
+                }
             )
         }
 
@@ -142,8 +133,10 @@ private object PlanActions {
 
 private object TemplateActions {
     @OptIn(DelicateCoroutinesApi::class)
-    fun saveTemplate(store: AppStateStore, type: com.example.missedcallpro.data.TemplateType, text: String) {
-        kotlinx.coroutines.GlobalScope.launch { store.setTemplate(type, text) }
+    fun saveSmsSettings(store: AppStateStore, company: String, template: String, includeLink: Boolean) {
+        kotlinx.coroutines.GlobalScope.launch {
+            store.saveSmsSettings( company, template,includeLink)
+        }
     }
 }
 

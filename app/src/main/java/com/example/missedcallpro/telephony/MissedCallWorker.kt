@@ -11,10 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.missedcallpro.App
-import com.example.missedcallpro.data.remote.BackendApi
 import com.example.missedcallpro.data.DeviceMissedCallRequest
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
 
 class MissedCallWorker(
     appContext: Context,
@@ -43,11 +40,11 @@ class MissedCallWorker(
         }
 
         try {
-
+            val timestamp = inputData.getLong("event_ts_ms", 0L)
             api.reportDeviceMissedCall(
                 body = DeviceMissedCallRequest(
                     from_number = missedNumber,
-                    occurred_at_ms = System.currentTimeMillis()
+                    occurred_at_ms = timestamp,
                 )
             )
             Log.d(TAG, "Reported missed call: $missedNumber")

@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 private val Context.dataStore by preferencesDataStore(name = "missedcallpro_prefs")
@@ -16,7 +17,8 @@ data class AppState(
     val plan: PlanState,
     val quotas: Quotas,
     val smsTemplate: String,
-    val emailTemplate: String
+    val companyName: String,
+    val includeFormLinkInSms: Boolean
 )
 
 class AppStateStore(private val context: Context) {
@@ -35,7 +37,8 @@ class AppStateStore(private val context: Context) {
         val SMS_USED = intPreferencesKey("sms_used")
         val EMAIL_USED = intPreferencesKey("email_used")
         val SMS_TEMPLATE = stringPreferencesKey("sms_template")
-        val EMAIL_TEMPLATE = stringPreferencesKey("email_template")
+        val COMPANY_NAME = stringPreferencesKey("company_name")
+        val INCLUDE_FORM_LINK_IN_SMS = booleanPreferencesKey("include_form_link_in_sms")
     }
 
     val state: Flow<AppState> = context.dataStore.data.map { prefs ->
@@ -56,7 +59,7 @@ class AppStateStore(private val context: Context) {
         val emailUsed = prefs[Keys.EMAIL_USED] ?: 0
 
         val defaultSms = Defaults.SMS_TEMPLATE
-        val defaultEmail = Defaults.EMAIL_TEMPLATE
+
 
         AppState(
             username = username,
@@ -65,7 +68,8 @@ class AppStateStore(private val context: Context) {
             plan = plan,
             quotas = Quotas(smsUsed = smsUsed, emailUsed = emailUsed),
             smsTemplate = prefs[Keys.SMS_TEMPLATE] ?: defaultSms,
-            emailTemplate = prefs[Keys.EMAIL_TEMPLATE] ?: defaultEmail
+            companyName = prefs[Keys.COMPANY_NAME] ?: "",
+            includeFormLinkInSms = prefs[Keys.INCLUDE_FORM_LINK_IN_SMS] ?: true
         )
     }
 
@@ -94,7 +98,6 @@ class AppStateStore(private val context: Context) {
             it.remove(Keys.PERIOD_START)
             it.remove(Keys.PERIOD_END)
             it.remove(Keys.SMS_TEMPLATE)
-            it.remove(Keys.EMAIL_TEMPLATE)
 
         }
     }
@@ -132,13 +135,19 @@ class AppStateStore(private val context: Context) {
             it[Keys.EMAIL_USED] = emailUsed
         }
     }
-
-    suspend fun setTemplate(type: TemplateType, value: String) {
+    suspend fun getCompanyName(): String {
+        val prefs = context.dataStore.data.first()
+        return prefs[Keys.COMPANY_NAME] ?: ""
+    }
+    suspend fun saveSmsSettings(
+        companyName: String,
+        template: String,
+        includeFormLinkInSms: Boolean
+    ) {
         context.dataStore.edit {
-            when (type) {
-                TemplateType.SMS -> it[Keys.SMS_TEMPLATE] = value
-                TemplateType.EMAIL -> it[Keys.EMAIL_TEMPLATE] = value
-            }
+            it[Keys.COMPANY_NAME] = companyName
+            it[Keys.SMS_TEMPLATE] = template
+            it[Keys.INCLUDE_FORM_LINK_IN_SMS] = includeFormLinkInSms
         }
     }
 

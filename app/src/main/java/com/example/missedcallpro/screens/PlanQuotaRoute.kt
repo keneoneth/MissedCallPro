@@ -35,7 +35,6 @@ fun PlanQuotaRoute(
     state: AppState,
     store: AppStateStore,
     onOpenSmsTemplate: () -> Unit,
-    onOpenEmailTemplate: () -> Unit,
     onUpgrade: () -> Unit,
     onViewMyAccount: () -> Unit,
     onSignOut: () -> Unit,
@@ -171,8 +170,8 @@ fun PlanQuotaRoute(
         is LoadState.Ready -> {
             PlanQuotaScreen(
                 state = s.screenState,
+                store = store,
                 onOpenSmsTemplate = onOpenSmsTemplate,
-                onOpenEmailTemplate = onOpenEmailTemplate,
                 onUpgrade = onUpgrade,
                 onViewMyAccount = onViewMyAccount,
                 onSignOut = onSignOut,

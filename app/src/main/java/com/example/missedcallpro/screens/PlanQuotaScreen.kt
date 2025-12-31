@@ -22,8 +22,10 @@ import com.example.missedcallpro.util.getPhonePermState
 import kotlinx.coroutines.launch
 import android.Manifest
 import android.widget.Toast
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import com.example.missedcallpro.data.AppStateStore
 
 @Composable
 fun PhonePermissionCard() {
@@ -64,11 +66,31 @@ fun PhonePermissionCard() {
         }
     }
 }
+
+@Composable
+fun CompanyNameWarning(companyName: String, onOpenSmsTemplate: () -> Unit) {
+    if (companyName.isBlank()) {
+        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
+            Column(Modifier.padding(12.dp)) {
+                Text("Action required", style = MaterialTheme.typography.titleSmall)
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "Company Name is not set. SMS sending will be blocked until you set it.",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Spacer(Modifier.height(10.dp))
+                Button(onClick = onOpenSmsTemplate) { Text("Set Company Name") }
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+    }
+}
+
 @Composable
 fun PlanQuotaScreen(
     state: AppState,
+    store: AppStateStore,
     onOpenSmsTemplate: () -> Unit,
-    onOpenEmailTemplate: () -> Unit,
     onUpgrade: () -> Unit,
     onViewMyAccount: () -> Unit,
     onSignOut: () -> Unit,
@@ -84,6 +106,12 @@ fun PlanQuotaScreen(
     // Re-check permission on every recomposition
     val permState by remember {
         derivedStateOf { getPhonePermState(context) }
+    }
+
+    var companyName by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        companyName = store.getCompanyName()
     }
 
     ScreenScaffold(
@@ -116,6 +144,8 @@ fun PlanQuotaScreen(
             if (!permState.allGranted) {
                 PhonePermissionCard()
             }
+            CompanyNameWarning(companyName = companyName, onOpenSmsTemplate=onOpenSmsTemplate)
+
             Spacer(Modifier.height(16.dp))
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp)) {
@@ -165,7 +195,7 @@ fun PlanQuotaScreen(
                 label = "Email notifications",
                 used = state.quotas.emailUsed,
                 limit = plan.emailLimit,
-                onClick = onOpenEmailTemplate
+                onClick = null
             )
 
         }

@@ -15,10 +15,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val app = application as App
 
         setContent {
             val nav = rememberNavController()
-            val store = remember { AppStateStore(this) }
+            val store = remember { app.store }
 
             MaterialTheme {
                 Surface {

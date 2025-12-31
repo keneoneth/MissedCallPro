@@ -4,7 +4,6 @@ object Routes {
     const val LANDING = "landing"
     const val PLAN = "plan"
     const val TEMPLATE_SMS = "template_sms"
-    const val TEMPLATE_EMAIL = "template_email"
     const val PAYMENT = "payment"
     const val MY_ACCOUNT = "my_account"
     const val FILTER_LIST = "filter_list"

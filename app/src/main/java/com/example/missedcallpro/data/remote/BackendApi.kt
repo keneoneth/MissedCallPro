@@ -12,6 +12,7 @@ import com.example.missedcallpro.data.GoogleRestoreReq
 import com.example.missedcallpro.data.GoogleRestoreResp
 import com.example.missedcallpro.data.OkResponse
 import com.example.missedcallpro.data.PlanDto
+import com.example.missedcallpro.data.SmsSettingsDto
 import com.example.missedcallpro.data.SubscriptionDto
 import com.squareup.moshi.JsonClass
 import retrofit2.http.Body
@@ -80,4 +81,10 @@ interface BackendApi {
     suspend fun reportDeviceMissedCall(
         @Body body: DeviceMissedCallRequest
     ): OkResponse
+
+    @GET("/settings/sms")
+    suspend fun getSmsSettings(): SmsSettingsDto
+
+    @PUT("/settings/sms")
+    suspend fun putSmsSettings(@Body body: SmsSettingsDto): SmsSettingsDto
 }

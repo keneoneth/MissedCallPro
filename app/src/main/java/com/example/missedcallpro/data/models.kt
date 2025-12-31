@@ -18,8 +18,6 @@ data class Quotas(
     fun emailLeft(limit: Int) = (limit - emailUsed).coerceAtLeast(0)
 }
 
-enum class TemplateType { SMS, EMAIL }
-
 data class PlanDto(
     val id: String,
     val name: String,
@@ -124,6 +122,12 @@ data class FeedbackResponse(
 data class DeviceMissedCallRequest(
     val from_number: String,
     val occurred_at_ms: Long
+)
+
+data class SmsSettingsDto(
+    val company_name: String,
+    val sms_template: String,
+    val include_form_link: Boolean
 )
 
 data class OkResponse(val ok: Boolean)
