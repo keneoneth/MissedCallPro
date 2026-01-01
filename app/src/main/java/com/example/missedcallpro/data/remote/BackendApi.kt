@@ -7,11 +7,12 @@ import com.example.missedcallpro.data.FeedbackResponse
 import com.example.missedcallpro.data.FilterNumberCreate
 import com.example.missedcallpro.data.FilterNumberOut
 import com.example.missedcallpro.data.FilterRuleUpdate
+import com.example.missedcallpro.data.FormResponseDto
+import com.example.missedcallpro.data.FormUpdateRequestDto
 import com.example.missedcallpro.data.GoogleConfirmReq
 import com.example.missedcallpro.data.GoogleConfirmResp
 import com.example.missedcallpro.data.GoogleRestoreReq
 import com.example.missedcallpro.data.GoogleRestoreResp
-import com.example.missedcallpro.data.OkResponse
 import com.example.missedcallpro.data.PlanDto
 import com.example.missedcallpro.data.SmsSettingsDto
 import com.example.missedcallpro.data.SubscriptionDto
@@ -88,4 +89,10 @@ interface BackendApi {
 
     @PUT("/settings/sms")
     suspend fun putSmsSettings(@Body body: SmsSettingsDto): SmsSettingsDto
+
+    @GET("/form")
+    suspend fun getForm(): FormResponseDto
+
+    @PUT("/form")
+    suspend fun updateForm(@Body req: FormUpdateRequestDto): FormResponseDto
 }

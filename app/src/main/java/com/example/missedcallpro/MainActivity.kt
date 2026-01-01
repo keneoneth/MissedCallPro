@@ -20,10 +20,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             val nav = rememberNavController()
             val store = remember { app.store }
+            val formStore = remember { app.formStore }
 
             MaterialTheme {
                 Surface {
-                    AppNavGraph(nav = nav, store = store)
+                    AppNavGraph(nav = nav, store = store, formStore = formStore)
                 }
             }
         }

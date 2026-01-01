@@ -1,5 +1,6 @@
 package com.example.missedcallpro.ui
 
+import android.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -52,5 +53,27 @@ fun QuotaRow(
             Text("$used / $limit used", style = MaterialTheme.typography.bodyMedium)
         }
         if (onClick != null) Text(">", style = MaterialTheme.typography.titleLarge)
+    }
+}
+
+@Composable
+fun FormEditRow(
+    label: String,
+    onClick: (() -> Unit)
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(Modifier.clickable { onClick() })
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                label,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+        Text(">", style = MaterialTheme.typography.titleLarge)
     }
 }

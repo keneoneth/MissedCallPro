@@ -8,4 +8,5 @@ object Routes {
     const val MY_ACCOUNT = "my_account"
     const val FILTER_LIST = "filter_list"
     const val FEEDBACK = "feedback"
+    const val FORM_EDIT = "form_edit"
 }

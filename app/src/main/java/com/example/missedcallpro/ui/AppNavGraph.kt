@@ -12,6 +12,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.missedcallpro.data.AppStateStore
+import com.example.missedcallpro.data.FormStore
 import com.example.missedcallpro.screens.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
@@ -20,7 +21,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun AppNavGraph(
     nav: NavHostController,
-    store: AppStateStore
+    store: AppStateStore,
+    formStore: FormStore
 ) {
     val state by store.state.collectAsState(
         initial = com.example.missedcallpro.data.AppState(
@@ -54,7 +56,8 @@ fun AppNavGraph(
                 onUpgrade = { nav.navigate(Routes.PAYMENT) },
                 onViewMyAccount = { nav.navigate(Routes.MY_ACCOUNT) },
                 onSignOut = { PlanActions.signOut(nav, store) },
-                onOpenFilterList = { nav.navigate(Routes.FILTER_LIST) }
+                onOpenFilterList = { nav.navigate(Routes.FILTER_LIST) },
+                onOpenFormEditPage = { nav.navigate(Routes.FORM_EDIT) }
             )
         }
 
@@ -102,6 +105,13 @@ fun AppNavGraph(
 
         composable(Routes.FEEDBACK) {
             FeedbackScreen (
+                onBack = { nav.popBackStack() }
+            )
+        }
+        composable(Routes.FORM_EDIT) {
+            FormEditorScreen (
+                store = formStore,
+                onUpgrade = { nav.navigate(Routes.PAYMENT) },
                 onBack = { nav.popBackStack() }
             )
         }

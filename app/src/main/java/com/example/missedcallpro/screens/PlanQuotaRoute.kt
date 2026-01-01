@@ -37,7 +37,8 @@ fun PlanQuotaRoute(
     onUpgrade: () -> Unit,
     onViewMyAccount: () -> Unit,
     onSignOut: () -> Unit,
-    onOpenFilterList: () -> Unit
+    onOpenFilterList: () -> Unit,
+    onOpenFormEditPage: () -> Unit
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as App
@@ -169,7 +170,8 @@ fun PlanQuotaRoute(
                 onUpgrade = onUpgrade,
                 onViewMyAccount = onViewMyAccount,
                 onSignOut = onSignOut,
-                onOpenFilterList = onOpenFilterList
+                onOpenFilterList = onOpenFilterList,
+                onOpenFormEditPage = onOpenFormEditPage
             )
         }
     }

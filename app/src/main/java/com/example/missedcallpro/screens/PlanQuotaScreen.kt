@@ -22,10 +22,9 @@ import com.example.missedcallpro.util.getPhonePermState
 import kotlinx.coroutines.launch
 import android.Manifest
 import android.widget.Toast
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import com.example.missedcallpro.data.AppStateStore
+import com.example.missedcallpro.ui.FormEditRow
 
 @Composable
 fun PhonePermissionCard() {
@@ -93,7 +92,8 @@ fun PlanQuotaScreen(
     onUpgrade: () -> Unit,
     onViewMyAccount: () -> Unit,
     onSignOut: () -> Unit,
-    onOpenFilterList: () -> Unit
+    onOpenFilterList: () -> Unit,
+    onOpenFormEditPage: () -> Unit,
 ) {
     val plan = state.plan
     val context = LocalContext.current
@@ -184,6 +184,12 @@ fun PlanQuotaScreen(
                 limit = plan.emailLimit,
                 onClick = null
             )
+
+            Spacer(Modifier.height(16.dp))
+            Text("Form", style = MaterialTheme.typography.titleLarge)
+            Spacer(Modifier.height(8.dp))
+
+            FormEditRow("active form", onOpenFormEditPage)
         }
     }
 }

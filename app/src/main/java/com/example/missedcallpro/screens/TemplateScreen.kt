@@ -229,7 +229,7 @@ fun TemplateScreen(
 
                             saveSmsSettings(resp.company_name, resp.sms_template, resp.include_form_link)
                             showEditor = false
-                            
+
                         } catch (e: HttpException) {
                             Toast.makeText(ctx, "Save rejected.", Toast.LENGTH_SHORT).show()
                             Log.e("TemplateScreen", "HTTP ${e.code()}", e)

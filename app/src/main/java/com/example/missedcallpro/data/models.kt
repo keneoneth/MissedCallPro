@@ -1,5 +1,7 @@
 package com.example.missedcallpro.data
 
+import com.squareup.moshi.JsonClass
+
 data class PlanState(
     val name: String,
     val smsLimit: Int,
@@ -150,4 +152,44 @@ data class SmsSettingsDto(
     val include_form_link: Boolean
 )
 
-data class OkResponse(val ok: Boolean)
+@JsonClass(generateAdapter = true)
+data class FormResponseDto(
+    val form: FormDefinitionDto,
+    val is_locked: Boolean
+)
+
+@JsonClass(generateAdapter = true)
+data class FormUpdateRequestDto(
+    val form: FormDefinitionDto
+)
+
+@JsonClass(generateAdapter = true)
+data class FormDefinitionDto(
+    val version: Int = 1,
+    val title: String = "Client Info",
+    val fields: List<FormFieldDto>,
+    val meta: FormMetaDto? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class FormMetaDto(
+    val created_at_ms: Long = 0,
+    val updated_at_ms: Long = 0
+)
+
+@JsonClass(generateAdapter = true)
+data class FormFieldDto(
+    val id: String,
+    val label: String,
+    val type: String, // "text" | "number" | "integer" | "mc" | "phone"
+    val required: Boolean = false,
+    val placeholder: String? = null,
+    val options: List<McOptionDto>? = null,
+    val max_choices: Int? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class McOptionDto(
+    val id: String,
+    val label: String
+)
