@@ -132,9 +132,10 @@ fun PhonePermissionCard() {
                     Text("Grant permissions")
                 }
 
-                Spacer(Modifier.height(16.dp))
+
             }
         }
+        Spacer(Modifier.height(16.dp))
     } else {
         // Everything allowed already — start the service once user reaches this screen
         // (safe even if called again; Android will reuse the same service instance)
