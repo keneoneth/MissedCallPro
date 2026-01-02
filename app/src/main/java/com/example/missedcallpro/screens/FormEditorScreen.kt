@@ -58,7 +58,7 @@ fun FormEditorScreen(
     var localForm by remember(serverForm) { mutableStateOf(serverForm) }
 
     // If backend says locked, we prevent edits
-    val locked = false //state.isLocked
+    val locked = state.isLocked
 
     // Dirty check (only enable Save when different from server baseline)
     val isDirty = localForm != null && serverForm != null && localForm != serverForm
