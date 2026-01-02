@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.provider.CallLog
 import android.util.Log
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters

@@ -42,7 +42,6 @@ data class PlanDto(
     val period: String,
     val sms_limit: Int,
     val email_limit: Int,
-    val form_limit: Int,
     val can_edit_templates: Boolean,
     val is_active: Boolean,
     val play_product_id: String?

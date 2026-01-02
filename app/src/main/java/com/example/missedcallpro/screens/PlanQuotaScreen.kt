@@ -21,50 +21,127 @@ import com.example.missedcallpro.ui.ScreenScaffold
 import com.example.missedcallpro.util.getPhonePermState
 import kotlinx.coroutines.launch
 import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.widget.Toast
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+import com.example.missedcallpro.telephony.MissedCallMonitoringService
 import com.example.missedcallpro.ui.FormEditRow
+import android.provider.Settings
+
+object MonitoringServiceStarter {
+    fun start(ctx: Context) {
+        val i = Intent(ctx, MissedCallMonitoringService::class.java)
+        ContextCompat.startForegroundService(ctx, i)
+    }
+}
 
 @Composable
 fun PhonePermissionCard() {
     val ctx = LocalContext.current
     var permState by remember { mutableStateOf(getPhonePermState(ctx)) }
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
-    ) { results ->
-        permState = getPhonePermState(ctx)
-
-        val grantedAll = results[Manifest.permission.READ_PHONE_STATE] == true &&
-                results[Manifest.permission.READ_CALL_LOG] == true
-
-        if (grantedAll) {
-            Toast.makeText(ctx, "Permissions granted. Missed-call auto-reply enabled.", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(ctx, "Permissions needed to detect missed calls.", Toast.LENGTH_SHORT).show()
-        }
+    // Are notifications globally enabled for this app? (User may have disabled them)
+    val notificationsEnabled = remember {
+        mutableStateOf(NotificationManagerCompat.from(ctx).areNotificationsEnabled())
     }
 
-    if (!permState.allGranted) {
+    fun openNotificationSettings() {
+        val intent = Intent().apply {
+            action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+            putExtra(Settings.EXTRA_APP_PACKAGE, ctx.packageName)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        ctx.startActivity(intent)
+    }
+
+    fun hasPostNotificationsPerm(): Boolean {
+        return Build.VERSION.SDK_INT < 33 ||
+                ContextCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+    }
+
+    fun startIfPossible() {
+        // Refresh notifications enabled state
+        notificationsEnabled.value = NotificationManagerCompat.from(ctx).areNotificationsEnabled()
+
+        val phonePermOk = permState.allGranted
+        val notifPermOk = hasPostNotificationsPerm()
+
+        if (!phonePermOk) return
+
+        if (!notifPermOk) {
+            Toast.makeText(ctx, "Please allow notifications so monitoring can run.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!notificationsEnabled.value) {
+            Toast.makeText(ctx, "Notifications are disabled for this app. Enable them to show monitoring.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        MonitoringServiceStarter.start(ctx)
+        Toast.makeText(ctx, "Monitoring enabled.", Toast.LENGTH_SHORT).show()
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { _ ->
+        permState = getPhonePermState(ctx)
+        startIfPossible()
+    }
+
+    // If phone permissions already granted but notification settings/perm prevents showing,
+    // show a card to guide user.
+    val needsPhonePerms = !permState.allGranted
+    val needsNotifPerm = Build.VERSION.SDK_INT >= 33 && !hasPostNotificationsPerm()
+    val notifBlockedByUser = !notificationsEnabled.value
+
+    if (needsPhonePerms || needsNotifPerm || notifBlockedByUser) {
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
-                Text("Enable missed-call auto-reply here.")
+                Text("Enable missed-call monitoring")
 
-                Button(onClick = {
-                    launcher.launch(arrayOf(
-                        Manifest.permission.READ_PHONE_STATE,
-                        Manifest.permission.READ_CALL_LOG
-                    ))
+                Spacer(Modifier.height(8.dp))
+
+                if (needsPhonePerms || needsNotifPerm) {
+                    Text("• Allow Phone + Call Log + Notifications permissions so we can detect missed calls.")
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                Button(
+                    onClick = {
+                        val perms = mutableListOf(
+                            Manifest.permission.READ_PHONE_STATE,
+                            Manifest.permission.READ_CALL_LOG
+                        )
+                        if (Build.VERSION.SDK_INT >= 33) {
+                            perms += Manifest.permission.POST_NOTIFICATIONS
+                        }
+                        launcher.launch(perms.toTypedArray())
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Grant permissions")
                 }
+
+                Spacer(Modifier.height(16.dp))
             }
         }
+    } else {
+        // Everything allowed already — start the service once user reaches this screen
+        // (safe even if called again; Android will reuse the same service instance)
+        startIfPossible()
     }
 }
+
 
 @Composable
 fun CompanyNameWarning(companyName: String, onOpenSmsTemplate: () -> Unit) {
@@ -101,8 +178,17 @@ fun PlanQuotaScreen(
     val authRepo = GoogleAuthClient(context)
     val app = LocalContext.current.applicationContext as App
     val api = app.container.api
+    val started = rememberSaveable { mutableStateOf(false) }
 
     val permState by remember { derivedStateOf { getPhonePermState(context) } }
+
+    LaunchedEffect(permState.allGranted) {
+        if (permState.allGranted && !started.value) {
+            Log.d("MonitoringServiceStarter","MonitoringServiceStarter started")
+            MonitoringServiceStarter.start(context)
+            started.value = true
+        }
+    }
 
     ScreenScaffold(
         title = "Plan & Quotas",

@@ -53,12 +53,11 @@ class PhoneStateReceiver : BroadcastReceiver() {
                     val req = OneTimeWorkRequestBuilder<MissedCallWorker>()
                         .setInputData(workDataOf("event_ts_ms" to System.currentTimeMillis()))
                         .build()
-                    val bucket = System.currentTimeMillis() / 1000
-                    val workName = "missed_call_${bucket}"
                     WorkManager.getInstance(context).enqueueUniqueWork(
-                        workName,
-                        ExistingWorkPolicy.KEEP,
-                        req)
+                        "missed_call_report",
+                        ExistingWorkPolicy.REPLACE,
+                        req
+                    )
                 }
                 sawRinging = false
                 sawOffhook = false
