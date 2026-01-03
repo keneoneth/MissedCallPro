@@ -57,6 +57,7 @@ fun AppNavGraph(
                 onViewMyAccount = { nav.navigate(Routes.MY_ACCOUNT) },
                 onSignOut = { PlanActions.signOut(nav, store) },
                 onOpenFilterList = { nav.navigate(Routes.FILTER_LIST) },
+                onOpenMissedCallRecord = { nav.navigate(Routes.MISSED_CALL_RECORD) },
                 onOpenFormEditPage = { nav.navigate(Routes.FORM_EDIT) }
             )
         }
@@ -108,6 +109,7 @@ fun AppNavGraph(
                 onBack = { nav.popBackStack() }
             )
         }
+
         composable(Routes.FORM_EDIT) {
             FormEditorScreen (
                 store = formStore,
@@ -115,6 +117,13 @@ fun AppNavGraph(
                 onBack = { nav.popBackStack() }
             )
         }
+
+        composable(Routes.MISSED_CALL_RECORD) {
+            MissedCallRecordScreen (
+                onBack = { nav.popBackStack() }
+            )
+        }
+
     }
 }
 

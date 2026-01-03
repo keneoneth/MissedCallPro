@@ -9,4 +9,5 @@ object Routes {
     const val FILTER_LIST = "filter_list"
     const val FEEDBACK = "feedback"
     const val FORM_EDIT = "form_edit"
+    const val MISSED_CALL_RECORD = "missed_call_record"
 }

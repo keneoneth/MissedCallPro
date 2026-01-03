@@ -171,6 +171,7 @@ fun PlanQuotaScreen(
     onViewMyAccount: () -> Unit,
     onSignOut: () -> Unit,
     onOpenFilterList: () -> Unit,
+    onOpenMissedCallRecord: () -> Unit,
     onOpenFormEditPage: () -> Unit,
 ) {
     val plan = state.plan
@@ -250,9 +251,14 @@ fun PlanQuotaScreen(
                 Text("My Account")
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(8.dp))
             OutlinedButton(onClick = onOpenFilterList, modifier = Modifier.fillMaxWidth()) {
                 Text("Filter List")
+            }
+
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = onOpenMissedCallRecord, modifier = Modifier.fillMaxWidth()) {
+                Text("Missed Call Record")
             }
 
             Spacer(Modifier.height(16.dp))

@@ -38,6 +38,7 @@ fun PlanQuotaRoute(
     onViewMyAccount: () -> Unit,
     onSignOut: () -> Unit,
     onOpenFilterList: () -> Unit,
+    onOpenMissedCallRecord: () -> Unit,
     onOpenFormEditPage: () -> Unit
 ) {
     val context = LocalContext.current
@@ -171,6 +172,7 @@ fun PlanQuotaRoute(
                 onViewMyAccount = onViewMyAccount,
                 onSignOut = onSignOut,
                 onOpenFilterList = onOpenFilterList,
+                onOpenMissedCallRecord = onOpenMissedCallRecord,
                 onOpenFormEditPage = onOpenFormEditPage
             )
         }

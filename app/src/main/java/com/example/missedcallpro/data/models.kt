@@ -192,3 +192,14 @@ data class McOptionDto(
     val id: String,
     val label: String
 )
+
+data class MissedCallsResponse(
+    val items: List<MissedCallItem>
+)
+
+data class MissedCallItem(
+    val caller: String,
+    val occurred_at: String, // ISO-8601 string from backend
+    val sms_status: String,
+    val sms_note: String? = null,
+)
