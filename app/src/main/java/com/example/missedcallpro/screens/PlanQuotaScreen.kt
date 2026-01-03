@@ -35,6 +35,8 @@ import androidx.core.content.ContextCompat
 import com.example.missedcallpro.telephony.MissedCallMonitoringService
 import com.example.missedcallpro.ui.FormEditRow
 import android.provider.Settings
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 object MonitoringServiceStarter {
     fun start(ctx: Context) {
@@ -192,6 +194,8 @@ fun PlanQuotaScreen(
         }
     }
 
+    val scrollState = rememberScrollState()
+
     ScreenScaffold(
         title = "Plan & Quotas",
         actions = {
@@ -213,6 +217,7 @@ fun PlanQuotaScreen(
             modifier = Modifier
                 .padding(padding)
                 .padding(16.dp)
+                .verticalScroll(scrollState)
                 .fillMaxSize()
         ) {
             if (!permState.allGranted) PhonePermissionCard()

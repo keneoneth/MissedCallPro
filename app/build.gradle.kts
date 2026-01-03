@@ -19,7 +19,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "BACKEND_URL", "\"https://maudie-mythical-enriqueta.ngrok-free.dev\"")
+        buildConfigField("String", "BACKEND_URL", "\"https://api.mcallpro.com\"")
     }
 
     buildTypes {
