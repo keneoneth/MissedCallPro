@@ -2,14 +2,18 @@ package com.example.missedcallpro.screens
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.missedcallpro.App
 import com.example.missedcallpro.data.AppState
+import com.example.missedcallpro.data.Defaults
 import com.example.missedcallpro.data.SmsSettingsDto
 import com.example.missedcallpro.ui.ScreenScaffold
 import kotlinx.coroutines.launch
@@ -63,6 +67,7 @@ fun TemplateScreen(
     val app = ctx.applicationContext as App
     val api = app.container.api
     val isPaid = state.plan.can_edit_templates
+    val OPT_OUT_SUFFIX = Defaults.OPT_OUT_SUFFIX
 
     var showEditor by remember { mutableStateOf(false) }
 
@@ -89,6 +94,9 @@ fun TemplateScreen(
     }
     val maxLen = SmsLimits.SMS_TOTAL_CHARS
     val overLimit = renderedLen > maxLen
+
+    val trimmedTemplateEnd = editingTemplate.trimEnd()
+    val missingOptOutSuffix = !trimmedTemplateEnd.endsWith(OPT_OUT_SUFFIX)
 
     val isChanged = companyTrimmed != state.companyName ||
             includeLink != state.includeFormLinkInSms ||
@@ -183,6 +191,15 @@ fun TemplateScreen(
                         )
                     }
 
+                    if (missingOptOutSuffix) {
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            "Your SMS template must end with: \"$OPT_OUT_SUFFIX\"",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+
                     Spacer(Modifier.height(16.dp))
                     Text("SMS Template", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))
@@ -240,7 +257,7 @@ fun TemplateScreen(
                     }
                 },
                 // Save blocked if over SMS limit or company name too long
-                enabled = isChanged && !overLimit && !companyTooLong,
+                enabled = isChanged && !overLimit && !companyTooLong && !missingOptOutSuffix,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Save Settings")
@@ -281,7 +298,13 @@ fun TemplateScreen(
                     )
 
                     Spacer(Modifier.height(10.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()), // Still recommended so chips don't vanish
+                        verticalAlignment = Alignment.Top,            // Changed from CenterVertically
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         AssistChip(
                             onClick = { if (isPaid) editingTemplate += " $PH_COMPANY" },
                             label = { Text("Insert Company") }
@@ -296,6 +319,17 @@ fun TemplateScreen(
                                 }
                             },
                             label = { Text("Insert Form Link") }
+                        )
+                        AssistChip(
+                            onClick = {
+                                if (isPaid) {
+                                    val t = editingTemplate.trimEnd()
+                                    if (!t.endsWith(OPT_OUT_SUFFIX)) {
+                                        editingTemplate = t.trimEnd() + (if (t.endsWith(".")) " " else " ") + OPT_OUT_SUFFIX
+                                    }
+                                }
+                            },
+                            label = { Text("Append STOP footer") }
                         )
                     }
                 }
