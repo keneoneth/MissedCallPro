@@ -7,6 +7,43 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:364608561220:android:3e9fa5153ff480c9f21c11",
+        "android_client_info": {
+          "package_name": "com.cd.missedcallpro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "364608561220-g47onh33d3u5fl8a6tce4rih0i1jsqc6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cd.missedcallpro",
+            "certificate_hash": "cd79209d0969bbee5dc54446717b7ebc0e03bb9c"
+          }
+        },
+        {
+          "client_id": "364608561220-tlbf2h7njfp6aa5devpuo326463jsvlr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvzspDKy1uHXJVSsoySBYbK5U9Z8jB9wY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "364608561220-tlbf2h7njfp6aa5devpuo326463jsvlr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:364608561220:android:83597ae40ab447c6f21c11",
         "android_client_info": {
           "package_name": "com.example.missedcallpro"

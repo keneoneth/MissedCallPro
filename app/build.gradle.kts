@@ -6,13 +6,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.missedcallpro"
+    namespace = "com.cd.missedcallpro"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.example.missedcallpro"
+        applicationId = "com.cd.missedcallpro"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
